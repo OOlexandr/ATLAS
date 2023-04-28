@@ -3,6 +3,7 @@ from datetime import date
 import copy
 import re
 import pickle
+from field import Field
 
 class RecordAlreadyExists(Exception):
     pass
@@ -21,19 +22,6 @@ class InvalidNameError(Exception):
 
 class InvalidDateError(Exception):
     pass
-
-class Field:
-    def __init__(self, value):
-        self.value = value
-    
-    @property
-    def value(self):
-        return self.__value
-    
-    @value.setter
-    def value(self, value):
-        if self.is_valid(value):
-            self.__value = value
 
 class Name(Field):
     def is_valid(self, value):
