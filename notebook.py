@@ -42,15 +42,3 @@ class Note:
 
 class Notebook(UserList):
     pass
-
-try:
-    tesTag = Tag("test")
-    print(tesTag)
-    tesTag2 = Tag("not long")
-    print(tesTag2)
-    text = NoteText("this is a tast note. Nothing wrong should be here")
-    print(text)
-    n1 = Note(text)
-    n2 = Note(text, [tesTag, tesTag2])
-except:
-    print("found an error")
