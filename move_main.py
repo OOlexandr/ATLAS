@@ -31,12 +31,13 @@ def sort_folder(path: Path, target_path: Path):
             if category == 'archives' and new_place.parent.exists():
                 shutil.unpack_archive(new_place, new_place.parent / new_place.stem)
 
+class InvalidPath(Exception):
+    pass
 
 def main_sort(path):
     path = Path(path)
     if not path.exists():
-        print(f"Path {path} not exists")
-        return None
+        raise InvalidPath
 
     sort_folder(path, path)
 
