@@ -139,10 +139,11 @@ def find(args):
         return "No contacts were found"
 
 @error_handler
-def sort(args[0]):
-    if len(args) > 1:
-        main_sort()
+def sort(args):
+    if len(args) > 0:
+        main_sort(args[0])
     return "Files sorted succesfully"
+        
 
 
 handlers = {"hello": handler_greetings,
