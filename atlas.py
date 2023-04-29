@@ -2,19 +2,26 @@ import address_book
 import notebook
 from move_main import main_sort, InvalidPath
 
+
 class NameNotGivenError(Exception):
     pass
+
 
 class PhoneNotGivenError(Exception):
     pass
 
+
 class BirthdayNotGivenError(Exception):
     pass
+
 
 class PathNotGivenError(Exception):
     pass
 
+
 contacts = address_book.AddressBook()
+notes = notebook.Notebook()
+
 
 def error_handler(func):
     def inner(args):
@@ -25,7 +32,7 @@ def error_handler(func):
         except address_book.InvalidPhoneError:
             return "Number is invalid"
         except address_book.InvalidNameError:
-            return "Name is invalid" #I don't expect ever getting it.
+            return "Name is invalid"  # I don't expect ever getting it.
         except address_book.InvalidDateError:
             return "Birthday is invalid"
         except NameNotGivenError:
@@ -44,20 +51,24 @@ def error_handler(func):
             return "Please enter path to the folder"
         except InvalidPath:
             return "The path is invalid"
+
     return inner
 
-#handlers
-#every handler acceptslist of arguments and returns message to be printed to command line
+
+# handlers
+# every handler acceptslist of arguments and returns message to be printed to command line
 @error_handler
 def handler_greetings(args):
     return "How can I help you?"
+
 
 @error_handler
 def handler_exit(args):
     return "Good bye!"
 
-#Тут бачу можливість покращення. Зараз ця функція приймає аргументи виключно в порядку
-#ім'я, номер, дата народження. Можливо можна зробити її більш гнучкою та зручною для користувача.
+
+# Тут бачу можливість покращення. Зараз ця функція приймає аргументи виключно в порядку
+# ім'я, номер, дата народження. Можливо можна зробити її більш гнучкою та зручною для користувача.
 @error_handler
 def handler_add(args):
     if len(args) < 1:
@@ -68,6 +79,7 @@ def handler_add(args):
     contacts.add_record(name, phone, birthday)
     return "Contact was added succesfully"
 
+
 @error_handler
 def handler_change(args):
     if len(args) < 3:
@@ -77,6 +89,7 @@ def handler_change(args):
     contacts[args[0]].change_phone(old_phone, new_phone)
     return "Contact was changed succesfully"
 
+
 @error_handler
 def handler_add_birthday(args):
     if len(args) < 2:
@@ -85,6 +98,7 @@ def handler_add_birthday(args):
     contacts[args[0]].birthday = birthday
     return "Birthday was added succesfully"
 
+
 @error_handler
 def handler_add_phone(args):
     if len(args) < 2:
@@ -92,6 +106,7 @@ def handler_add_phone(args):
     phone = address_book.Phone(args[1])
     contacts[args[0]].add_phone(phone)
     return "Phone was added succesfully"
+
 
 @error_handler
 def handler_phone(args):
@@ -103,6 +118,7 @@ def handler_phone(args):
         result += " " + phone.value
     return result
 
+
 @error_handler
 def handler_days_to_birthday(args):
     if len(args) < 1:
@@ -113,6 +129,7 @@ def handler_days_to_birthday(args):
         return f"There are {days} days until birthday"
     else:
         return "Contact's birthday is unknown"
+
 
 @error_handler
 def handler_show_all(args):
@@ -131,6 +148,7 @@ def handler_show_all(args):
 
     return message
 
+
 @error_handler
 def find(args):
     records = contacts.find_records(args[0])
@@ -145,13 +163,23 @@ def find(args):
     else:
         return "No contacts were found"
 
+
 @error_handler
 def sort(args):
     if len(args) == 0:
         raise PathNotGivenError
     main_sort(args[0])
     return "Files sorted succesfully"
-        
+
+
+@error_handler
+def delete_note(args):
+    note_name = args[0]
+    if notes.delete_note(note_name):
+        return f"Note {note_name} successfully deleted"
+    else:
+        return f"Can't delete note: {note_name}!"
+
 
 handlers = {"hello": handler_greetings,
             "good bye": handler_exit,
@@ -165,13 +193,16 @@ handlers = {"hello": handler_greetings,
             "days to birthday": handler_days_to_birthday,
             "show all": handler_show_all,
             "find": find,
-            "sort": sort}
-#key - command, value - handler.
+            "sort": sort,
+            "delnote": delete_note}
 
-#parcer
+
+# key - command, value - handler.
+
+# parcer
 def parce(command):
-    #returns list. first element - handler and the rest are arguments
-    #returns None if command is not recognized
+    # returns list. first element - handler and the rest are arguments
+    # returns None if command is not recognized
     command = command.strip().lower()
     parced_command = []
     for handler in handlers:
@@ -183,6 +214,7 @@ def parce(command):
         parced_command += command.split()
         return parced_command
     return None
+
 
 def main():
     contacts.read_contacts()
@@ -196,6 +228,7 @@ def main():
                 return
         else:
             print("unknown command")
+
 
 if __name__ == '__main__':
     main()
