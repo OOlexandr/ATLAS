@@ -1,6 +1,6 @@
 import address_book
 import notebook
-from move_main import main_sort
+from move_main import main_sort, InvalidPath
 
 class NameNotGivenError(Exception):
     pass
@@ -9,6 +9,9 @@ class PhoneNotGivenError(Exception):
     pass
 
 class BirthdayNotGivenError(Exception):
+    pass
+
+class PathNotGivenError(Exception):
     pass
 
 contacts = address_book.AddressBook()
@@ -37,6 +40,10 @@ def error_handler(func):
             return "The phone already exists"
         except address_book.PhoneNotFoundError:
             return "The phone is not found"
+        except PathNotGivenError:
+            return "Please enter path to the folder"
+        except InvalidPath:
+            return "The path is invalid"
     return inner
 
 #handlers
@@ -140,11 +147,11 @@ def find(args):
 
 @error_handler
 def sort(args):
-    if len(args) > 0:
-        main_sort(args[0])
+    if len(args) == 0:
+        raise PathNotGivenError
+    main_sort(args[0])
     return "Files sorted succesfully"
         
-
 
 handlers = {"hello": handler_greetings,
             "good bye": handler_exit,
