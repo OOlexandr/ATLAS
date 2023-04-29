@@ -1,5 +1,6 @@
 import address_book
 import notebook
+from move_main import main_sort
 
 class NameNotGivenError(Exception):
     pass
@@ -137,6 +138,13 @@ def find(args):
     else:
         return "No contacts were found"
 
+@error_handler
+def sort(args[0]):
+    if len(args) > 1:
+        main_sort()
+    return "Files sorted succesfully"
+
+
 handlers = {"hello": handler_greetings,
             "good bye": handler_exit,
             "close": handler_exit,
@@ -148,7 +156,8 @@ handlers = {"hello": handler_greetings,
             "phone": handler_phone,
             "days to birthday": handler_days_to_birthday,
             "show all": handler_show_all,
-            "find": find}
+            "find": find,
+            "sort": sort}
 #key - command, value - handler.
 
 #parcer

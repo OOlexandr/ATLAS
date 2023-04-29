@@ -32,13 +32,8 @@ def sort_folder(path: Path, target_path: Path):
                 shutil.unpack_archive(new_place, new_place.parent / new_place.stem)
 
 
-def main():
-    try:
-        path = Path(input("Please provide a path to the directory you want to sort: "))
-    except IndexError:
-        print("Sorry, take a path as a parameter")
-        return None
-
+def main_sort(path):
+    path = Path(path)
     if not path.exists():
         print(f"Path {path} not exists")
         return None
@@ -47,4 +42,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main_sort()
