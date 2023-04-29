@@ -2,6 +2,10 @@ import address_book
 import notebook
 from move_main import main_sort, InvalidPath
 
+from prompt_toolkit import PromptSession
+from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
+from prompt_toolkit.completion import WordCompleter
+
 
 class NameNotGivenError(Exception):
     pass
@@ -181,20 +185,20 @@ def delete_note(args):
         return f"Can't delete note: {note_name}!"
 
 
-handlers = {"hello": handler_greetings,
-            "good bye": handler_exit,
-            "close": handler_exit,
-            "exit": handler_exit,
-            "add record": handler_add,
-            "add birthday": handler_add_birthday,
-            "add phone": handler_add_phone,
-            "change": handler_change,
-            "phone": handler_phone,
-            "days to birthday": handler_days_to_birthday,
-            "show all": handler_show_all,
-            "find": find,
-            "sort": sort,
-            "delnote": delete_note}
+handlers = {"hello": {"func": handler_greetings, "help_message": "Just greeting!"},
+            "good bye": {"func": handler_exit, "help_message": "exit from bot"},
+            "close": {"func": handler_exit, "help_message": "exit from bot"},
+            "exit": {"func": handler_exit, "help_message": "exit from bot"},
+            "add record": {"func": handler_add, "help_message": "add record ContactName ContactPhone Contactbirthday"},
+            "add birthday": {"func": handler_add_birthday, "help_message": "add birthday ContactName Contactbirthday"},
+            "add phone": {"func": handler_add_phone, "help_message": "add phone ContactName ContactPhone"},
+            "change": {"func": handler_change, "help_message": "change ContactName OldPhone NewPhone"},
+            "phone": {"func": handler_phone, "help_message": "phone ContactName"},
+            "days to birthday": {"func": handler_days_to_birthday, "help_message": "days to birthday ContactName"},
+            "show all": {"func": handler_show_all, "help_message": "showed all contacts"},
+            "find": {"func": find, "help_message": "find ContactName"},
+            "sort": {"func": sort, "help_message": "sort FolderPath"},
+            "delnote": {"func": delete_note, "help_message": "delnote NoteName"}}
 
 
 # key - command, value - handler.
@@ -208,7 +212,7 @@ def parce(command):
     for handler in handlers:
         if command.startswith(handler):
             command = command.removeprefix(handler)
-            parced_command.append(handlers[handler])
+            parced_command.append(handlers[handler]["func"])
             break
     if parced_command:
         parced_command += command.split()
@@ -216,10 +220,23 @@ def parce(command):
     return None
 
 
+comands_list = []
+comands_list_meta_dict = {}
+
+for k, v in handlers.items():
+    comands_list.append(k)
+    comands_list_meta_dict.update({k: v["help_message"]})
+
+
 def main():
+    session = PromptSession()
     contacts.read_contacts()
     while True:
-        command = parce(input())
+
+        input_text = session.prompt('Input command >>> ', auto_suggest=AutoSuggestFromHistory(),
+                              completer=WordCompleter(comands_list, meta_dict=comands_list_meta_dict, sentence=True))
+
+        command = parce(input_text)
         if command:
             result = command[0](command[1:])
             print(result)
