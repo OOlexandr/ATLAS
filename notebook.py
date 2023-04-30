@@ -63,7 +63,7 @@ class Notebook(UserList):
     def delete_note(self, note_name: str):
         if note_name:
             for note in self.data:
-                if note.value == note_name:
+                if note.name.value == note_name:
                     self.data.remove(note)
                     return True
         return False
