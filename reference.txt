@@ -1,0 +1,12 @@
+@error_handler
+def reference(args):
+    return """Hello, I'm a bot. I will help you use the program.
+        - For add contact to directory input <<< add 'name' 'phone number in format '+xx-xxx-xxx-xx-xx', 'email', 'Birthdate' in format dd-mm-yyyy'  >>> use a space without a comma
+        - For find contact in directory input <<< find 'name'  >>> use a space without a comma
+        - For search contact by name letters, input <<< search name letters
+        - For show all contacts in directory input <<< show >>> 
+        - For update contact in directory input <<< update 'name' 'new number'  >>> use a space without a comma
+        - For return the number of days until the next birthday, enter <<<dtb "name">>>.
+        - To exit the program input <<<exit>>> or <<<bye>>>
+        - To sort the files, input the "sort" command and the path to the directory with the files by a space
+        - To get help about the operation of the program, input the command help"""
