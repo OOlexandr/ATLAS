@@ -2,6 +2,8 @@ import address_book
 import notebook
 from move_main import main_sort, InvalidPath
 
+
+
 class NameNotGivenError(Exception):
     pass
 
@@ -13,6 +15,25 @@ class BirthdayNotGivenError(Exception):
 
 class PathNotGivenError(Exception):
     pass
+
+# кожен може зробити опис  команди
+print ("""Hello, I'm a personal assistant. 
+    You can use next commands:
+        "hello": handler_greetings,
+        "good bye": handler_exit,
+        "close": handler_exit,
+        "exit": handler_exit,
+        "add record": handler_add,
+        "add birthday": handler_add_birthday,
+        "add phone": handler_add_phone,
+        "change": handler_change,
+        "phone": handler_phone,
+        "days to birthday": handler_days_to_birthday,
+        "show all": handler_show_all,
+        "find": find,
+        "sort": To sort the files, input the "sort" command and the path to the directory with the files by a space
+        "help": To get help about the operation of the program, input the command help""")    
+
 
 contacts = address_book.AddressBook()
 
@@ -151,6 +172,20 @@ def sort(args):
         raise PathNotGivenError
     main_sort(args[0])
     return "Files sorted succesfully"
+
+@error_handler
+def reference(args):
+    return """Hello, I'm a bot. I will help you use the program.
+        - For add contact to directory input <<< add 'name' 'phone number in format '+xx-xxx-xxx-xx-xx', 'email', 'Birthdate' in format dd-mm-yyyy'  >>> use a space without a comma
+        - For find contact in directory input <<< find 'name'  >>> use a space without a comma
+        - For search contact by name letters, input <<< search name letters
+        - For show all contacts in directory input <<< show >>> 
+        - For update contact in directory input <<< update 'name' 'new number'  >>> use a space without a comma
+        - For return the number of days until the next birthday, enter <<<dtb "name">>>.
+        - To exit the program input <<<exit>>> or <<<bye>>>
+        - To sort the files, input the "sort" command and the path to the directory with the files by a space
+        - To get help about the operation of the program, input the command help"""
+        
         
 
 handlers = {"hello": handler_greetings,
@@ -165,7 +200,8 @@ handlers = {"hello": handler_greetings,
             "days to birthday": handler_days_to_birthday,
             "show all": handler_show_all,
             "find": find,
-            "sort": sort}
+            "sort": sort,
+            "help": reference}
 #key - command, value - handler.
 
 #parcer
