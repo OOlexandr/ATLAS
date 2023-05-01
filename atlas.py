@@ -174,7 +174,7 @@ def sort(args):
     return "Files sorted succesfully"
 
 def reference(args):
-    with open('help.txt', 'r') as file:
+    with open('readme.txt', encoding="utf-8") as file:
             for line in file:
                 print(line)
 
