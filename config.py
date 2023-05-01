@@ -1,3 +1,6 @@
-use_modal_winfow = False
-use_promt_toolkit = True
 pre_command_text = "Input command >>> "
+
+use_promt_toolkit = True
+use_nested_completer = True
+use_modal_window = False
+

@@ -7,7 +7,8 @@ from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 from prompt_toolkit.completion import WordCompleter
 from prompt_toolkit.completion import NestedCompleter
 
-from config import use_promt_toolkit, pre_command_text
+from config import use_promt_toolkit, pre_command_text, use_nested_completer
+
 
 class NameNotGivenError(Exception):
     pass
@@ -28,8 +29,10 @@ class PathNotGivenError(Exception):
 class TextNotGivenError(Exception):
     pass
 
+
 class NoteNameNotGivenError(Exception):
     pass
+
 
 contacts = address_book.AddressBook()
 notes = notebook.Notebook()
@@ -67,6 +70,7 @@ def error_handler(func):
             return "Please enter text to find"
         except NoteNameNotGivenError:
             return "Please enter note name to delete"
+
     return inner
 
 
@@ -184,7 +188,7 @@ def sort(args):
     if len(args) == 0:
         raise PathNotGivenError
     main_sort(args[0])
-    return "Files sorted succesfully"
+    return "Files sorted successfully"
 
 
 @error_handler
@@ -217,16 +221,19 @@ handlers = {"hello": {"func": handler_greetings, "help_message": "Just greeting!
             "close": {"func": handler_exit, "help_message": "exit from bot"},
             "exit": {"func": handler_exit, "help_message": "exit from bot"},
             "add record": {"func": handler_add, "help_message": "add record ContactName ContactPhone Contactbirthday"},
-            "add birthday": {"func": handler_add_birthday, "help_message": "add birthday ContactName Contactbirthday"},
-            "add phone": {"func": handler_add_phone, "help_message": "add phone ContactName ContactPhone"},
-            "change": {"func": handler_change, "help_message": "change ContactName OldPhone NewPhone"},
-            "phone": {"func": handler_phone, "help_message": "phone ContactName"},
+            "add birthday": {"func": handler_add_birthday, "help_message": "add birthday ContactName Contactbirthday",
+                             "from_data": contacts},
+            "add phone": {"func": handler_add_phone, "help_message": "add phone ContactName ContactPhone",
+                          "from_data": contacts},
+            "change": {"func": handler_change, "help_message": "change ContactName OldPhone NewPhone",
+                       "from_data": contacts},
+            "phone": {"func": handler_phone, "help_message": "phone ContactName", "from_data": contacts},
             "days to birthday": {"func": handler_days_to_birthday, "help_message": "days to birthday ContactName"},
             "show all": {"func": handler_show_all, "help_message": "showed all contacts"},
-            "find note": {"func": find_note, "help_message": "find NoteText"},
-            "find": {"func": find, "help_message": "find ContactName"},
+            "findnote": {"func": find_note, "help_message": "find NoteText", "from_data": notes},
+            "find": {"func": find, "help_message": "find ContactName", "from_data": contacts},
             "sort": {"func": sort, "help_message": "sort FolderPath"},
-            "delnote": {"func": delete_note, "help_message": "delnote NoteName"}}
+            "delnote": {"func": delete_note, "help_message": "delnote NoteName", "from_data": notes}}
 
 
 # key - command, value - handler.
@@ -248,40 +255,59 @@ def parce(command):
     return None
 
 
-comands_list_meta_dict = {}
 comands_nested_dict = {}
-
-for k, v in handlers.items():
-
-    comands_nested_dict.update({k:None})
-
-    comands_list_meta_dict.update({k: v["help_message"]})
-
-# def update_nested_dict()
-#     global need_nested_dict_udate
-#     if need_nested_dict_udate:
-#
-#
-#
-#         need_nested_dict_udate = False
+comands_list = []
+comands_list_meta_dict = {}
 
 
+def create_completer_data():
+    if use_nested_completer:
+        global comands_nested_dict
+        for k, v in handlers.items():
+            comands_nested_dict.update({k: None})
+    else:
+        global comands_list
+        global comands_list_meta_dict
+        for k, v in handlers.items():
+            comands_list.append(k)
+            comands_list_meta_dict.update({k: v["help_message"]})
+
+
+def update_nested_dict():
+    # global need_nested_dict_udate
+    # if need_nested_dict_udate:
+    #     need_nested_dict_udate = False
+    global comands_nested_dict
+
+    for command_name, params_dict in handlers.items():
+        from_data = params_dict.get("from_data")
+        if from_data:
+            # print(f"command_name:{command_name} : {from_data.get_data_list()}")
+
+            comands_nested_dict[command_name] = WordCompleter(from_data.get_data_list(), match_middle=True)
 
 
 def main():
+    contacts.read_contacts()
+    notes.load_notes_from_file()
+
     if use_promt_toolkit:
+        create_completer_data()
         session = PromptSession()
-        contacts.read_contacts()
-        notes.load_notes_from_file()
 
     while True:
 
         if use_promt_toolkit:
-            input_text = session.prompt(pre_command_text, auto_suggest=AutoSuggestFromHistory(),
-                                        completer=NestedCompleter.from_nested_dict(comands_nested_dict))
 
-            # input_text = session.prompt(pre_command_text, auto_suggest=AutoSuggestFromHistory(),
-            #                   completer=WordCompleter(comands_list, meta_dict=comands_list_meta_dict, sentence=True))
+            update_nested_dict()
+
+            if use_nested_completer:
+                input_text = session.prompt(pre_command_text, auto_suggest=AutoSuggestFromHistory(),
+                                            completer=NestedCompleter.from_nested_dict(comands_nested_dict))
+            else:
+                input_text = session.prompt(pre_command_text, auto_suggest=AutoSuggestFromHistory(),
+                                            completer=WordCompleter(comands_list, meta_dict=comands_list_meta_dict,
+                                                                    sentence=True))
         else:
             input_text = input(pre_command_text)
 
