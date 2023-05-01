@@ -1,5 +1,6 @@
 from collections import UserList
 from field import Field
+import re
 
 class InvalidTagError(Exception):
     pass
@@ -41,4 +42,11 @@ class Note:
             self.__text = text
 
 class Notebook(UserList):
-    pass
+    def notes_search_content(self, query):
+        matching_notes = []
+        if self.data:
+            for note in self.data:
+                if re.search(query, note.text.value, re.IGNORECASE):
+                    matching_notes.append(note)
+        return matching_notes
+

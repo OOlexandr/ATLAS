@@ -14,7 +14,11 @@ class BirthdayNotGivenError(Exception):
 class PathNotGivenError(Exception):
     pass
 
+class TextNotGivenError(Exception):
+    pass
+
 contacts = address_book.AddressBook()
+notes = notebook.Notebook()
 
 def error_handler(func):
     def inner(args):
@@ -44,6 +48,8 @@ def error_handler(func):
             return "Please enter path to the folder"
         except InvalidPath:
             return "The path is invalid"
+        except TextNotGivenError:
+            return "Please enter text to find"
     return inner
 
 #handlers
@@ -151,7 +157,19 @@ def sort(args):
         raise PathNotGivenError
     main_sort(args[0])
     return "Files sorted succesfully"
-        
+
+@error_handler
+def find_note(args):
+    if len(args) == 0:
+        raise TextNotGivenError
+    text = ' '.join(args)
+    found_notes = notes.notes_search_content(text)
+    if found_notes:
+        message = "found notes are:\n"
+        for n in found_notes:
+            message += "\n" + n.text.value
+        return message
+    return "No notes found"
 
 handlers = {"hello": handler_greetings,
             "good bye": handler_exit,
@@ -164,6 +182,7 @@ handlers = {"hello": handler_greetings,
             "phone": handler_phone,
             "days to birthday": handler_days_to_birthday,
             "show all": handler_show_all,
+            "find note": find_note,
             "find": find,
             "sort": sort}
 #key - command, value - handler.
