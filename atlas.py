@@ -27,6 +27,10 @@ class TextNotGivenError(Exception):
     pass
 
 
+class NoteNameNotGivenError(Exception):
+    pass
+
+
 contacts = address_book.AddressBook()
 notes = notebook.Notebook()
 
@@ -61,6 +65,9 @@ def error_handler(func):
             return "The path is invalid"
         except TextNotGivenError:
             return "Please enter text to find"
+        except NoteNameNotGivenError:
+            return "Please enter note name to delete"
+
     return inner
 
 
@@ -197,6 +204,8 @@ def find_note(args):
 
 @error_handler
 def delete_note(args):
+    if len(args) == 0:
+        raise NoteNameNotGivenError
     note_name = args[0]
     if notes.delete_note(note_name):
         return f"Note {note_name} successfully deleted"
@@ -255,7 +264,8 @@ def main():
     while True:
 
         input_text = session.prompt('Input command >>> ', auto_suggest=AutoSuggestFromHistory(),
-                              completer=WordCompleter(comands_list, meta_dict=comands_list_meta_dict, sentence=True))
+                                    completer=WordCompleter(comands_list, meta_dict=comands_list_meta_dict,
+                                                            sentence=True))
 
         command = parce(input_text)
         if command:
