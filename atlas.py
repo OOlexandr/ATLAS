@@ -5,7 +5,9 @@ from move_main import main_sort, InvalidPath
 from prompt_toolkit import PromptSession
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 from prompt_toolkit.completion import WordCompleter
+from prompt_toolkit.completion import NestedCompleter
 
+from config import use_promt_toolkit, pre_command_text
 
 class NameNotGivenError(Exception):
     pass
@@ -26,6 +28,8 @@ class PathNotGivenError(Exception):
 class TextNotGivenError(Exception):
     pass
 
+class NoteNameNotGivenError(Exception):
+    pass
 
 contacts = address_book.AddressBook()
 notes = notebook.Notebook()
@@ -61,6 +65,8 @@ def error_handler(func):
             return "The path is invalid"
         except TextNotGivenError:
             return "Please enter text to find"
+        except NoteNameNotGivenError:
+            return "Please enter note name to delete"
     return inner
 
 
@@ -197,6 +203,8 @@ def find_note(args):
 
 @error_handler
 def delete_note(args):
+    if len(args) == 0:
+        raise NoteNameNotGivenError
     note_name = args[0]
     if notes.delete_note(note_name):
         return f"Note {note_name} successfully deleted"
@@ -240,22 +248,42 @@ def parce(command):
     return None
 
 
-comands_list = []
 comands_list_meta_dict = {}
+comands_nested_dict = {}
 
 for k, v in handlers.items():
-    comands_list.append(k)
+
+    comands_nested_dict.update({k:None})
+
     comands_list_meta_dict.update({k: v["help_message"]})
+
+# def update_nested_dict()
+#     global need_nested_dict_udate
+#     if need_nested_dict_udate:
+#
+#
+#
+#         need_nested_dict_udate = False
+
+
 
 
 def main():
-    session = PromptSession()
-    contacts.read_contacts()
-    notes.load_notes_from_file()
+    if use_promt_toolkit:
+        session = PromptSession()
+        contacts.read_contacts()
+        notes.load_notes_from_file()
+
     while True:
 
-        input_text = session.prompt('Input command >>> ', auto_suggest=AutoSuggestFromHistory(),
-                              completer=WordCompleter(comands_list, meta_dict=comands_list_meta_dict, sentence=True))
+        if use_promt_toolkit:
+            input_text = session.prompt(pre_command_text, auto_suggest=AutoSuggestFromHistory(),
+                                        completer=NestedCompleter.from_nested_dict(comands_nested_dict))
+
+            # input_text = session.prompt(pre_command_text, auto_suggest=AutoSuggestFromHistory(),
+            #                   completer=WordCompleter(comands_list, meta_dict=comands_list_meta_dict, sentence=True))
+        else:
+            input_text = input(pre_command_text)
 
         command = parce(input_text)
         if command:
