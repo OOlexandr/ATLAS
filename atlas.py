@@ -205,6 +205,7 @@ def parce(command):
 
 def main():
     contacts.read_contacts()
+    notes.load_notes_from_file()
     while True:
         command = parce(input())
         if command:
@@ -212,6 +213,7 @@ def main():
             print(result)
             if result == "Good bye!":
                 contacts.save_contacts()
+                notes.save_notes_to_file()
                 return
         else:
             print("unknown command")
