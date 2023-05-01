@@ -61,6 +61,7 @@ def error_handler(func):
             return "The path is invalid"
         except TextNotGivenError:
             return "Please enter text to find"
+
     return inner
 
 
@@ -156,6 +157,19 @@ def handler_show_all(args):
             message += c_str
 
     return message
+
+
+# my code
+@error_handler
+def handler_addnote(args):
+    if len(args) < 2:
+        raise TextNotGivenError
+    title = Name(args[0])
+    text = NoteText(' '.join(args[1:]))
+    note = Note(name=title, text=text)
+    notes.append(note)
+    notes.save_notes_to_file()
+    return "Note added successfully"
 
 
 @error_handler
@@ -255,7 +269,8 @@ def main():
     while True:
 
         input_text = session.prompt('Input command >>> ', auto_suggest=AutoSuggestFromHistory(),
-                              completer=WordCompleter(comands_list, meta_dict=comands_list_meta_dict, sentence=True))
+                                    completer=WordCompleter(comands_list, meta_dict=comands_list_meta_dict,
+                                                            sentence=True))
 
         command = parce(input_text)
         if command:
