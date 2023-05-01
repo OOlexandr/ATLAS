@@ -1,5 +1,8 @@
 from collections import UserList
 from field import Field
+import re
+import pickle
+import copy
 
 
 class InvalidTagError(Exception):
@@ -60,6 +63,31 @@ class Note:
 
 
 class Notebook(UserList):
+    def __init__(self):
+        super().__init__()
+        self.file_name = 'notes_12_team.bin'
+        
+    def notes_search_content(self, query):
+        matching_notes = []
+        if self.data:
+            for note in self.data:
+                if re.search(query, note.text.value, re.IGNORECASE):
+                    matching_notes.append(note)
+        return matching_notes
+    
+    def save_notes_to_file(self):
+        with open(self.file_name, 'wb') as fh:
+            pickle.dump(self, fh)
+
+    def load_notes_from_file(self):
+        try:
+            with open(self.file_name, 'rb') as fh:
+                notes = pickle.load(fh)
+                if notes:
+                    self.data = copy.deepcopy(notes.data)
+        except:
+            pass
+            
     def delete_note(self, note_name: str):
         if note_name:
             for note in self.data:

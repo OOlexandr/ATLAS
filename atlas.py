@@ -23,6 +23,10 @@ class PathNotGivenError(Exception):
     pass
 
 
+class TextNotGivenError(Exception):
+    pass
+
+
 contacts = address_book.AddressBook()
 notes = notebook.Notebook()
 
@@ -55,7 +59,8 @@ def error_handler(func):
             return "Please enter path to the folder"
         except InvalidPath:
             return "The path is invalid"
-
+        except TextNotGivenError:
+            return "Please enter text to find"
     return inner
 
 
@@ -177,6 +182,20 @@ def sort(args):
 
 
 @error_handler
+def find_note(args):
+    if len(args) == 0:
+        raise TextNotGivenError
+    text = ' '.join(args)
+    found_notes = notes.notes_search_content(text)
+    if found_notes:
+        message = "found notes are:\n"
+        for n in found_notes:
+            message += "\n" + n.text.value
+        return message
+    return "No notes found"
+
+
+@error_handler
 def delete_note(args):
     note_name = args[0]
     if notes.delete_note(note_name):
@@ -196,6 +215,7 @@ handlers = {"hello": {"func": handler_greetings, "help_message": "Just greeting!
             "phone": {"func": handler_phone, "help_message": "phone ContactName"},
             "days to birthday": {"func": handler_days_to_birthday, "help_message": "days to birthday ContactName"},
             "show all": {"func": handler_show_all, "help_message": "showed all contacts"},
+            "find note": {"func": find_note, "help_message": "find NoteText"},
             "find": {"func": find, "help_message": "find ContactName"},
             "sort": {"func": sort, "help_message": "sort FolderPath"},
             "delnote": {"func": delete_note, "help_message": "delnote NoteName"}}
@@ -231,6 +251,7 @@ for k, v in handlers.items():
 def main():
     session = PromptSession()
     contacts.read_contacts()
+    notes.load_notes_from_file()
     while True:
 
         input_text = session.prompt('Input command >>> ', auto_suggest=AutoSuggestFromHistory(),
@@ -242,6 +263,7 @@ def main():
             print(result)
             if result == "Good bye!":
                 contacts.save_contacts()
+                notes.save_notes_to_file()
                 return
         else:
             print("unknown command")
