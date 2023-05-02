@@ -216,7 +216,7 @@ def delete_note(args):
 def reference(args):
     with open('readme.txt', encoding="utf-8") as file:
             for line in file:
-                print(line)
+                return line
 
 
 handlers = {"hello": {"func": handler_greetings, "help_message": "Just greeting!"},
