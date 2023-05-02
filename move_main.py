@@ -42,5 +42,5 @@ def main_sort(path):
     sort_folder(path, path)
 
 
-if __name__ == "__main__":
-    main_sort()
+#if __name__ == "__main__":
+#    main_sort()
