@@ -211,7 +211,8 @@ def delete_note(args):
         return f"Note {note_name} successfully deleted"
     else:
         return f"Can't delete note: {note_name}!"
-    
+
+@error_handler    
 def reference(args):
     with open('readme.txt', encoding="utf-8") as file:
             for line in file:
