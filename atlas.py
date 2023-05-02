@@ -1,5 +1,5 @@
 import address_book
-import notebook
+from notebook import *
 from move_main import main_sort, InvalidPath
 import csv
 from prompt_toolkit import PromptSession
@@ -32,7 +32,7 @@ class NoteNameNotGivenError(Exception):
 
 
 contacts = address_book.AddressBook()
-notes = notebook.Notebook()
+notes = Notebook()
 
 
 def error_handler(func):
@@ -264,7 +264,8 @@ handlers = {"hello": {"func": handler_greetings, "help_message": "Just greeting!
             "sort": {"func": sort, "help_message": "sort FolderPath"},
             "delnote": {"func": delete_note, "help_message": "delnote NoteName"},
             "help": {"func": reference, "help_message": "help NoteName"},
-            "export": {"func": export, "help_messege": "export NoteName"}}
+            "export": {"func": export, "help_message": "export NoteName"},
+            "add note": {"func": handler_addnote, "help_message": "add note name text"}}
 
 
 # key - command, value - handler.
