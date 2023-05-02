@@ -1,7 +1,7 @@
 import address_book
 import notebook
 from move_main import main_sort, InvalidPath
-
+import csv
 from prompt_toolkit import PromptSession
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 from prompt_toolkit.completion import WordCompleter
@@ -181,6 +181,24 @@ def find(args):
 
 
 @error_handler
+def export(args):
+    if contacts:
+    
+        with open("contacts.csv", "w", newline="") as is_file:
+            fieldnames = ["Name", "Phone", "Email"]
+            writer = csv.DictWriter(is_file, fieldnames=fieldnames)
+
+            writer.writeheader()
+            for name, info in contacts.items():
+                writer.writerow({"Name": name, "Phone": info["phone"], "Email": info["email"]})
+
+        return "Contacts successfully exported to file contacts.csv."
+    else:
+        return "Contact list is empty."
+
+
+
+@error_handler
 def sort(args):
     if len(args) == 0:
         raise PathNotGivenError
@@ -234,7 +252,8 @@ handlers = {"hello": {"func": handler_greetings, "help_message": "Just greeting!
             "find": {"func": find, "help_message": "find ContactName"},
             "sort": {"func": sort, "help_message": "sort FolderPath"},
             "delnote": {"func": delete_note, "help_message": "delnote NoteName"},
-            "help": {"func": reference, "help_message": "help NoteName"}}
+            "help": {"func": reference, "help_message": "help NoteName"},
+            "export": {"func": export, "help_messege": "export NoteName"}}
 
 
 # key - command, value - handler.
