@@ -211,6 +211,11 @@ def delete_note(args):
         return f"Note {note_name} successfully deleted"
     else:
         return f"Can't delete note: {note_name}!"
+    
+def reference(args):
+    with open('readme.txt', encoding="utf-8") as file:
+            for line in file:
+                print(line)
 
 
 handlers = {"hello": {"func": handler_greetings, "help_message": "Just greeting!"},
@@ -227,7 +232,8 @@ handlers = {"hello": {"func": handler_greetings, "help_message": "Just greeting!
             "find note": {"func": find_note, "help_message": "find NoteText"},
             "find": {"func": find, "help_message": "find ContactName"},
             "sort": {"func": sort, "help_message": "sort FolderPath"},
-            "delnote": {"func": delete_note, "help_message": "delnote NoteName"}}
+            "delnote": {"func": delete_note, "help_message": "delnote NoteName"},
+            "help": {"func": reference, "help_message": "help NoteName"}}
 
 
 # key - command, value - handler.
