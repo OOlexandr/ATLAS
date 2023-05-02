@@ -205,6 +205,17 @@ def sort(args):
     main_sort(args[0])
     return "Files sorted succesfully"
 
+# my code
+@error_handler
+def handler_addnote(args):
+    if len(args) < 2:
+        raise TextNotGivenError
+    title = Name(args[0])
+    text = NoteText(' '.join(args[1:]))
+    note = Note(name=title, text=text)
+    notes.append(note)
+    notes.save_notes_to_file()
+    return "Note added successfully"
 
 @error_handler
 def find_note(args):
