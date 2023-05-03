@@ -231,17 +231,17 @@ def handler_addnote(args):
 # Gievskiy
 @error_handler
 def handler_change_note(args):
-    if len(args) < 2:
+    if len(args) < 1:
         raise TextNotGivenError
     elif len(args) == 2:
-        old_ch_text = NoteText(args[1])
-        new_ch_text = NoteText(args[2])
+        old_ch_text = str(args[0])
+        new_ch_text = str(args[1])
     elif len(args) == 3:
-        old_ch_text = NoteText(args[1])
-        new_ch_text = NoteText(args[2])
-        title = Name(args[3])
+        old_ch_text = str(args[0])
+        new_ch_text = str(args[1])
+        name_note = Name(args[2])
     
-    notes.notes_search_text(old_ch_text, new_ch_text, title)
+    notes.notes_change_text(old_ch_text, new_ch_text, name_note)
     
 
 @error_handler
