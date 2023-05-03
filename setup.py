@@ -8,10 +8,7 @@ setup(
     author_email='oleksarkhumua@gmail.com',
     license='MIT',
     packages=find_namespace_packages(),
-    entry_points={
-   'console_scripts': [
-       'atlas = Atlas\ATLAS.atlas:main',
-       ]
+    entry_points={'console_scripts': ['atlas = Atlas.atlas:main',]
    },
    install_requires=['prompt_toolkit'],
    include_package_data=True
