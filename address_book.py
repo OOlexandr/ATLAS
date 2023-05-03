@@ -49,10 +49,7 @@ class Phone(Field):
         return self.normalize_number(self.value)
 
     def is_valid(self, value):
-<<<<<<< HEAD
-=======
 
->>>>>>> 5b7629b94d7a3944e9a8386875d3b0c8f33a0b4d
         value = value.strip()
         if re.match(r"(\+380\(\d{2}\)\d{3}\-(?:(?=\d{2}-)(\d{2}-\d{2})|(\d-\d{3})))", value):
             return  value
