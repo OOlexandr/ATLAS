@@ -224,6 +224,11 @@ def delete_note(args):
     else:
         return f"Can't delete note: {note_name}!"
 
+@error_handler
+def sortnote(args):
+    pass
+
+
 
 handlers = {"hello": {"func": handler_greetings,
                       "help_message": "Just greeting!"},
@@ -261,7 +266,10 @@ handlers = {"hello": {"func": handler_greetings,
                      "help_message": "sort FolderPath"},
             "delnote": {"func": delete_note,
                         "help_message": "delnote NoteName",
-                        "from_data": notes}}
+                        "from_data": notes},
+            "sortnote": {"func": sortnote,
+                        "help_message": "sortnote",
+                        "nested_dict": {"name": {"inc": None, "dec": None}, "text": {"inc": None, "dec": None}}}}
 
 
 # key - command, value - handler.
@@ -321,6 +329,11 @@ def update_nested_dict():
 
             comands_nested_dict[command_name] = WordCompleter(from_data.get_data_list(), match_middle=True,
                                                               sentence=True, meta_dict=meta_dict)
+        nested_dict = params_dict.get("nested_dict")
+        if nested_dict:
+
+            comands_nested_dict[command_name] = nested_dict
+
 
 
 def main():
