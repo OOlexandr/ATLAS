@@ -121,3 +121,9 @@ class Notebook(UserList):
         for note in self.data:
             names_list.append(note.name.value)
         return names_list
+
+    def get_list_of_text(self):
+        text_list = []
+        for note in self.data:
+            text_list.append(note.text.value)
+        return text_list
