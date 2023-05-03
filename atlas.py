@@ -1,7 +1,7 @@
 import address_book
-import notebook
+from notebook import *
 from move_main import main_sort, InvalidPath
-
+import csv
 from prompt_toolkit import PromptSession
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 from prompt_toolkit.completion import WordCompleter
@@ -39,7 +39,7 @@ class ContctNameNotGivenError(Exception):
 
 
 contacts = address_book.AddressBook()
-notes = notebook.Notebook()
+notes = Notebook()
 
 
 def error_handler(func):
@@ -77,7 +77,6 @@ def error_handler(func):
         except ContctNameNotGivenError:
             return "Please enter contact name to find"
 
-
     return inner
 
 
@@ -86,6 +85,18 @@ def error_handler(func):
 @error_handler
 def handler_greetings(args):
     return "How can I help you?"
+
+
+@error_handler
+def handler_addnote(args):
+    if len(args) < 2:
+        raise TextNotGivenError
+    title = Name(args[0])
+    text = NoteText(' '.join(args[1:]))
+    note = Note(name=title, text=text)
+    notes.append(note)
+    notes.save_notes_to_file()
+    return "Note added successfully"
 
 
 @error_handler
@@ -104,7 +115,6 @@ def handler_add(args):
     birthday = address_book.Birthday(args[2]) if args[2:] else None
     contacts.add_record(name, phone, birthday)
     return "Contact was added succesfully"
-
 
 @error_handler
 def handler_change(args):
@@ -193,12 +203,73 @@ def find(args):
 
 
 @error_handler
+def export(args):
+    if contacts:
+    
+        with open("contacts.csv", "w", newline="") as is_file:
+            fieldnames = ["Name", "Phone", "Email"]
+            writer = csv.DictWriter(is_file, fieldnames=fieldnames)
+
+            writer.writeheader()
+            for name, info in contacts.items():
+                writer.writerow({"Name": name, "Phone": info["phone"], "Email": info["email"]})
+
+        return "Contacts successfully exported to file contacts.csv."
+    else:
+        return "Contact list is empty."
+
+
+
+@error_handler
 def sort(args):
     if len(args) == 0:
         raise PathNotGivenError
     main_sort(args[0])
     return "Files sorted successfully"
 
+# my code
+@error_handler
+def handler_add_note(args):
+    if len(args) < 2:
+        raise TextNotGivenError
+    title = Name(args[0])
+    text = NoteText(' '.join(args[1:]))
+    note = Note(name=title, text=text)
+    notes.append(note)
+    notes.save_notes_to_file()
+    return "Note added successfully"
+
+# Gievskiy 02052023
+@error_handler
+def handler_add_note_tag(args):
+    note_name = None
+    if len(args) < 2:
+        raise TextNotGivenError
+    
+    title = Name(args[0])
+    tag = Tag(args[1])
+    
+    # У нас список, а не словарь
+    # note = notes.get(title.value)
+
+    for i, l in enumerate(notes):
+       if l.name.value == title.value:
+           text = l.text.value
+           note_name = l
+           break
+    
+    if not note_name:
+        text = NoteText(' '.join(args[1:])) #  обязательный параметр
+        note: Note  = Note(title, text, tag)
+        notes.append(note)
+        return f"{title.value}, {text.value}, {tag.value} has been added to the NoteBook"
+    else:
+        note_name.add_note_tag(tag)
+        text_tag =''
+        for i in note_name.tags:
+            text_tag += ' ' + i.value if text_tag != '' else i.value
+        return f"{note_name.name.value}, {note_name.text.value}, {text_tag} has been added to the NoteBook"
+# **** 02052023
 
 @error_handler
 def find_note(args):
@@ -209,7 +280,7 @@ def find_note(args):
     if found_notes:
         message = "found notes are:\n"
         for n in found_notes:
-            message += "\n" + n.text.value
+            message += "\n" + str(n)
         return message
     return "No notes found"
 
@@ -224,10 +295,17 @@ def delete_note(args):
     else:
         return f"Can't delete note: {note_name}!"
 
+
 @error_handler
 def sortnote(args):
     pass
 
+
+@error_handler    
+def reference(args):
+    with open('readme.txt', encoding="utf-8") as file:
+            for line in file:
+                return line
 
 
 handlers = {"hello": {"func": handler_greetings,
@@ -269,7 +347,17 @@ handlers = {"hello": {"func": handler_greetings,
                         "from_data": notes},
             "sortnote": {"func": sortnote,
                         "help_message": "sortnote",
-                        "nested_dict": {"name": {"inc": None, "dec": None}, "text": {"inc": None, "dec": None}}}}
+                        "nested_dict": {"name": {"inc": None, "dec": None}, "text": {"inc": None, "dec": None}}},
+            # Gievskiy 02052023 
+            "add note": {"func": handler_add_note,
+                        "help_message": "add note NoteName"},
+            "add tag": {"func": handler_add_note_tag,
+                       "help_message": "add tag note NoteName"},
+            # **** 02052023
+            "help": {"func": reference, "help_message":
+                    "help NoteName"},
+            "export": {"func": export,
+                      "help_message": "export NoteName"}}
 
 
 # key - command, value - handler.
