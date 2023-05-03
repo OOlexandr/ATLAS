@@ -10,7 +10,7 @@ setup(
     packages=find_namespace_packages(),
     entry_points={
    'console_scripts': [
-       'atlas = Atlas/ATLAS.atlas:main',
+       'atlas = Atlas.atlas:main',
        ]
    },
    install_requires=['prompt_toolkit'],

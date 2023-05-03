@@ -1,13 +1,13 @@
-import address_book
-from notebook import *
-from move_main import main_sort, InvalidPath
+from .address_book import *
+from .notebook import *
+from .move_main import main_sort, InvalidPath
 import csv
 from prompt_toolkit import PromptSession
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 from prompt_toolkit.completion import WordCompleter
 from prompt_toolkit.completion import NestedCompleter
 
-from config import use_promt_toolkit, pre_command_text, use_nested_completer
+from .config import use_promt_toolkit, pre_command_text, use_nested_completer
 
 
 class NameNotGivenError(Exception):
@@ -38,7 +38,7 @@ class ContctNameNotGivenError(Exception):
     pass
 
 
-contacts = address_book.AddressBook()
+contacts = AddressBook()
 notes = Notebook()
 
 
@@ -48,11 +48,11 @@ def error_handler(func):
             return func(args)
         except KeyError:
             return "The user is not in the address book"
-        except address_book.InvalidPhoneError:
+        except InvalidPhoneError:
             return "Number is invalid"
-        except address_book.InvalidNameError:
+        except InvalidNameError:
             return "Name is invalid"  # I don't expect ever getting it.
-        except address_book.InvalidDateError:
+        except InvalidDateError:
             return "Birthday is invalid"
         except NameNotGivenError:
             return "Please enter user name"
@@ -60,11 +60,11 @@ def error_handler(func):
             return "Please enter user name and number"
         except BirthdayNotGivenError:
             return "Please enter user name and birthday"
-        except address_book.RecordAlreadyExists:
+        except RecordAlreadyExists:
             return "The user is already in the address book"
-        except address_book.PhoneAlreadyExistsError:
+        except PhoneAlreadyExistsError:
             return "The phone already exists"
-        except address_book.PhoneNotFoundError:
+        except PhoneNotFoundError:
             return "The phone is not found"
         except PathNotGivenError:
             return "Please enter path to the folder"
@@ -110,9 +110,9 @@ def handler_exit(args):
 def handler_add(args):
     if len(args) < 1:
         raise NameNotGivenError
-    name = address_book.Name(args[0])
-    phone = address_book.Phone(args[1]) if args[1:] else None
-    birthday = address_book.Birthday(args[2]) if args[2:] else None
+    name = Name(args[0])
+    phone = Phone(args[1]) if args[1:] else None
+    birthday = Birthday(args[2]) if args[2:] else None
     contacts.add_record(name, phone, birthday)
     return "Contact was added succesfully"
 
@@ -121,8 +121,8 @@ def handler_add(args):
 def handler_change(args):
     if len(args) < 3:
         raise PhoneNotGivenError
-    old_phone = address_book.Phone(args[1])
-    new_phone = address_book.Phone(args[2])
+    old_phone = Phone(args[1])
+    new_phone = Phone(args[2])
     contacts[args[0]].change_phone(old_phone, new_phone)
     return "Contact was changed succesfully"
 
@@ -131,7 +131,7 @@ def handler_change(args):
 def handler_add_birthday(args):
     if len(args) < 2:
         raise BirthdayNotGivenError
-    birthday = address_book.Birthday(args[1])
+    birthday = Birthday(args[1])
     contacts[args[0]].birthday = birthday
     return "Birthday was added succesfully"
 
@@ -140,7 +140,7 @@ def handler_add_birthday(args):
 def handler_add_phone(args):
     if len(args) < 2:
         raise PhoneNotGivenError
-    phone = address_book.Phone(args[1])
+    phone = Phone(args[1])
     contacts[args[0]].add_phone(phone)
     return "Phone was added succesfully"
 
