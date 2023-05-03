@@ -194,7 +194,7 @@ class AddressBook(UserDict):
         except:
             pass
 
-<<<<<<< HEAD
+
 
 phone1 = Phone('380601234567')
 phone2 = Phone('+380(60)410-38-75')
@@ -202,10 +202,4 @@ phone3 = Phone('+38(096)5179199')
 print(phone1)
 print(phone2)
 print(phone3)
-=======
-    def get_data_list(self):
-        data_list = []
-        for k in self.data:
-            data_list.append(k)
-        return data_list
->>>>>>> 5b7629b94d7a3944e9a8386875d3b0c8f33a0b4d
+
