@@ -6,8 +6,9 @@ from prompt_toolkit import PromptSession
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 from prompt_toolkit.completion import WordCompleter
 from prompt_toolkit.completion import NestedCompleter
+from prompt_toolkit.shortcuts import message_dialog
 
-from config import use_promt_toolkit, pre_command_text, use_nested_completer
+from config import use_promt_toolkit, pre_command_text, use_nested_completer, use_modal_window
 
 
 class NameNotGivenError(Exception):
@@ -273,16 +274,39 @@ def handler_add_note_tag(args):
 
 @error_handler
 def find_note(args):
+
     if len(args) == 0:
         raise TextNotGivenError
     text = ' '.join(args)
     found_notes = notes.notes_search_content(text)
+
+    found_note_text_list = []
     if found_notes:
-        message = "found notes are:\n"
-        for n in found_notes:
-            message += "\n" + str(n)
-        return message
-    return "No notes found"
+
+        for found_note in found_notes:
+            found_note_text_list.append(f"*Name:\n\t{found_note.name.value}\n*Text:\n\t{found_note.text.value}\n*Tags:\n\t{found_note.tags}")
+
+        found_note_text = ""
+        for i in found_note_text_list:
+            found_note_text += i + "\n"
+
+        if use_modal_window and len(found_note_text_list) == 1:
+
+            message_dialog(title='Found note:', text=found_note_text).run()
+
+        else:
+            message = "found notes are:\n"
+
+            n = 1
+            for i in found_note_text_list:
+                message += f"{n}.{18*'_'}\n{i} \n{20*'_'}\n"
+                n += 1
+
+            return message
+
+    else:
+        return "No notes found"
+
 
 
 @error_handler
@@ -319,39 +343,41 @@ handlers = {"hello": {"func": handler_greetings,
                           "help_message": "addrecord ContactName ContactPhone Contactbirthday"},
             "addbirthday": {"func": handler_add_birthday,
                             "help_message": "addbirthday ContactName Contactbirthday",
-                            "from_data": contacts},
+                            "from_data": contacts.get_data_list},
             "addphone": {"func": handler_add_phone,
                          "help_message": "addphone ContactName ContactPhone",
-                         "from_data": contacts},
+                         "from_data": contacts.get_data_list},
             "change": {"func": handler_change,
                        "help_message": "change ContactName OldPhone NewPhone",
-                       "from_data": contacts},
+                       "from_data": contacts.get_data_list},
             "phone": {"func": handler_phone,
                       "help_message": "phone ContactName",
-                      "from_data": contacts},
+                      "from_data": contacts.get_data_list},
             "daystobirthday": {"func": handler_days_to_birthday,
                                "help_message": "daystobirthday ContactName",
-                               "from_data": contacts},
+                               "from_data": contacts.get_data_list},
             "showall": {"func": handler_show_all,
                         "help_message": "showed all contacts"},
             "findnote": {"func": find_note,
-                         "help_message": "findnote NoteText"},
+                         "help_message": "findnote NoteText",
+                         "from_data": notes.get_list_of_text},
             "find": {"func": find,
                      "help_message": "find ContactName",
-                     "from_data": contacts},
+                     "from_data": contacts.get_data_list},
             "sort": {"func": sort,
                      "help_message": "sort FolderPath"},
             "delnote": {"func": delete_note,
                         "help_message": "delnote NoteName",
-                        "from_data": notes},
+                        "from_data": notes.get_data_list},
             "sortnote": {"func": sortnote,
                         "help_message": "sortnote",
                         "nested_dict": {"name": {"inc": None, "dec": None}, "text": {"inc": None, "dec": None}}},
-            # Gievskiy 02052023 
-            "add note": {"func": handler_add_note,
-                        "help_message": "add note NoteName"},
-            "add tag": {"func": handler_add_note_tag,
-                       "help_message": "add tag note NoteName"},
+            # Gievskiy 02052023
+            "addnote": {"func": handler_add_note,
+                        "help_message": "addnote NoteName",},
+            "addtag": {"func": handler_add_note_tag,
+                       "help_message": "addtag NoteName tag",
+                       "from_data": notes.get_data_list},
             # **** 02052023
             "help": {"func": reference, "help_message":
                     "help NoteName"},
@@ -411,10 +437,12 @@ def update_nested_dict():
 
             meta_dict = {}
 
-            for note_name in from_data.get_data_list():
+            list_of_data = from_data()
+
+            for note_name in list_of_data:
                 meta_dict.update({note_name: comands_list_meta_dict.get(command_name)})
 
-            comands_nested_dict[command_name] = WordCompleter(from_data.get_data_list(), match_middle=True,
+            comands_nested_dict[command_name] = WordCompleter(list_of_data, match_middle=True,
                                                               sentence=True, meta_dict=meta_dict)
         nested_dict = params_dict.get("nested_dict")
         if nested_dict:
