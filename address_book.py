@@ -38,29 +38,8 @@ class Phone(Field):
             return True
         else:
             raise InvalidPhoneError
-        
-    def __init__(self, number, name):
-        self.name = name
-        self.mask_patterns = [
 
-            r'^\d{12}$',
-            r'^\+?\d{12}$', 
-            r'\+\d{2}\(\d{3}\)\d{7}'
-        ]
 
-        self.number = self.normalize_number(number)
-
-    def __str__(self):
-        return f'{self.name}: {self.number}'
-    
-    def normalize_number(self, number):
-    
-        for pattern in self.mask_patterns:
-            match = re.match(pattern, number)
-            number = re.sub(r'[()]', '', number)
-            if match:
-                return f'+{number[-12:]}'
-        raise ValueError('Invalid phone number format')
 
 class Birthday(Field):
     def is_valid(self, value):
@@ -183,3 +162,15 @@ class AddressBook(UserDict):
                     self.data = copy.deepcopy(content)
         except:
             pass
+
+
+# phone1 = Phone('380601234567')
+phone2 = Phone(+380604103875)
+# phone3 = Phone('+38(096)5179199')
+# phone4 = Phone('38-066-123-4567', 'Valeriia')
+
+# print(phone1)
+print(phone2)
+# print(phone3)
+
+# print(phone4)
