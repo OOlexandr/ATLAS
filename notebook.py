@@ -115,7 +115,9 @@ class Notebook(UserList):
                     self.data.remove(note)
                     return True
         return False
-    
-    
-    
-      
+
+    def get_data_list(self):
+        names_list = []
+        for note in self.data:
+            names_list.append(note.name.value)
+        return names_list

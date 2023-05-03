@@ -5,6 +5,9 @@ import csv
 from prompt_toolkit import PromptSession
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 from prompt_toolkit.completion import WordCompleter
+from prompt_toolkit.completion import NestedCompleter
+
+from config import use_promt_toolkit, pre_command_text, use_nested_completer
 
 
 class NameNotGivenError(Exception):
@@ -28,6 +31,10 @@ class TextNotGivenError(Exception):
 
 
 class NoteNameNotGivenError(Exception):
+    pass
+
+
+class ContctNameNotGivenError(Exception):
     pass
 
 
@@ -67,6 +74,8 @@ def error_handler(func):
             return "Please enter text to find"
         except NoteNameNotGivenError:
             return "Please enter note name to delete"
+        except ContctNameNotGivenError:
+            return "Please enter contact name to find"
 
     return inner
 
@@ -178,6 +187,8 @@ def handler_show_all(args):
 
 @error_handler
 def find(args):
+    if len(args) == 0:
+        raise ContctNameNotGivenError
     records = contacts.find_records(args[0])
     if records:
         message = "Found contacts are:"
@@ -214,7 +225,7 @@ def sort(args):
     if len(args) == 0:
         raise PathNotGivenError
     main_sort(args[0])
-    return "Files sorted succesfully"
+    return "Files sorted successfully"
 
 # my code
 @error_handler
@@ -284,6 +295,12 @@ def delete_note(args):
     else:
         return f"Can't delete note: {note_name}!"
 
+
+@error_handler
+def sortnote(args):
+    pass
+
+
 @error_handler    
 def reference(args):
     with open('readme.txt', encoding="utf-8") as file:
@@ -291,28 +308,56 @@ def reference(args):
                 return line
 
 
-handlers = {"hello": {"func": handler_greetings, "help_message": "Just greeting!"},
-            "good bye": {"func": handler_exit, "help_message": "exit from bot"},
-            "close": {"func": handler_exit, "help_message": "exit from bot"},
-            "exit": {"func": handler_exit, "help_message": "exit from bot"},
-            "add record": {"func": handler_add, "help_message": "add record ContactName ContactPhone Contactbirthday"},
-            "add birthday": {"func": handler_add_birthday, "help_message": "add birthday ContactName Contactbirthday"},
-            "add phone": {"func": handler_add_phone, "help_message": "add phone ContactName ContactPhone"},
-            "change": {"func": handler_change, "help_message": "change ContactName OldPhone NewPhone"},
-            "phone": {"func": handler_phone, "help_message": "phone ContactName"},
-            "days to birthday": {"func": handler_days_to_birthday, "help_message": "days to birthday ContactName"},
-            "show all": {"func": handler_show_all, "help_message": "showed all contacts"},
-            "find note": {"func": find_note, "help_message": "find NoteText"},
-            "find": {"func": find, "help_message": "find ContactName"},
-            "sort": {"func": sort, "help_message": "sort FolderPath"},
-            "delnote": {"func": delete_note, "help_message": "delnote NoteName"},
-            # Gievskiy 02052023
-            "add note": {"func": handler_add_note, "help_message": "add note NoteName"},
-            "add tag": {"func": handler_add_note_tag, "help_message": "add tag note NoteName"},
+handlers = {"hello": {"func": handler_greetings,
+                      "help_message": "Just greeting!"},
+            "goodbye": {"func": handler_exit,
+                        "help_message": "exit from bot"},
+            "close": {"func": handler_exit,
+                      "help_message": "exit from bot"},
+            "exit": {"func": handler_exit,
+                     "help_message": "exit from bot"},
+            "addrecord": {"func": handler_add,
+                          "help_message": "addrecord ContactName ContactPhone Contactbirthday"},
+            "addbirthday": {"func": handler_add_birthday,
+                            "help_message": "addbirthday ContactName Contactbirthday",
+                            "from_data": contacts},
+            "addphone": {"func": handler_add_phone,
+                         "help_message": "addphone ContactName ContactPhone",
+                         "from_data": contacts},
+            "change": {"func": handler_change,
+                       "help_message": "change ContactName OldPhone NewPhone",
+                       "from_data": contacts},
+            "phone": {"func": handler_phone,
+                      "help_message": "phone ContactName",
+                      "from_data": contacts},
+            "daystobirthday": {"func": handler_days_to_birthday,
+                               "help_message": "daystobirthday ContactName",
+                               "from_data": contacts},
+            "showall": {"func": handler_show_all,
+                        "help_message": "showed all contacts"},
+            "findnote": {"func": find_note,
+                         "help_message": "findnote NoteText"},
+            "find": {"func": find,
+                     "help_message": "find ContactName",
+                     "from_data": contacts},
+            "sort": {"func": sort,
+                     "help_message": "sort FolderPath"},
+            "delnote": {"func": delete_note,
+                        "help_message": "delnote NoteName",
+                        "from_data": notes},
+            "sortnote": {"func": sortnote,
+                        "help_message": "sortnote",
+                        "nested_dict": {"name": {"inc": None, "dec": None}, "text": {"inc": None, "dec": None}}},
+            # Gievskiy 02052023 
+            "add note": {"func": handler_add_note,
+                        "help_message": "add note NoteName"},
+            "add tag": {"func": handler_add_note_tag,
+                       "help_message": "add tag note NoteName"},
             # **** 02052023
-            "help": {"func": reference, "help_message": "help NoteName"},
-            "export": {"func": export, "help_message": "export NoteName"},
-            "add note": {"func": handler_addnote, "help_message": "add note name text"}}
+            "help": {"func": reference, "help_message":
+                    "help NoteName"},
+            "export": {"func": export,
+                      "help_message": "export NoteName"}}
 
 
 # key - command, value - handler.
@@ -334,23 +379,74 @@ def parce(command):
     return None
 
 
+comands_nested_dict = {}
 comands_list = []
 comands_list_meta_dict = {}
 
-for k, v in handlers.items():
-    comands_list.append(k)
-    comands_list_meta_dict.update({k: v["help_message"]})
+
+def create_completer_data():
+    global comands_nested_dict
+    global comands_list_meta_dict
+    global comands_list
+
+    if use_nested_completer:
+
+        for k, v in handlers.items():
+            comands_nested_dict.update({k: None})
+            comands_list_meta_dict.update({k: v["help_message"]})
+    else:
+
+        for k, v in handlers.items():
+            comands_list.append(k)
+            comands_list_meta_dict.update({k: v["help_message"]})
+
+
+def update_nested_dict():
+
+    global comands_nested_dict
+
+    for command_name, params_dict in handlers.items():
+        from_data = params_dict.get("from_data")
+
+        if from_data:
+
+            meta_dict = {}
+
+            for note_name in from_data.get_data_list():
+                meta_dict.update({note_name: comands_list_meta_dict.get(command_name)})
+
+            comands_nested_dict[command_name] = WordCompleter(from_data.get_data_list(), match_middle=True,
+                                                              sentence=True, meta_dict=meta_dict)
+        nested_dict = params_dict.get("nested_dict")
+        if nested_dict:
+
+            comands_nested_dict[command_name] = nested_dict
+
 
 
 def main():
-    session = PromptSession()
     contacts.read_contacts()
     notes.load_notes_from_file()
+
+    if use_promt_toolkit:
+        create_completer_data()
+        session = PromptSession()
+
     while True:
 
-        input_text = session.prompt('Input command >>> ', auto_suggest=AutoSuggestFromHistory(),
-                                    completer=WordCompleter(comands_list, meta_dict=comands_list_meta_dict,
-                                                            sentence=True))
+        if use_promt_toolkit:
+
+            update_nested_dict()
+
+            if use_nested_completer:
+                input_text = session.prompt(pre_command_text, auto_suggest=AutoSuggestFromHistory(),
+                                            completer=NestedCompleter.from_nested_dict(comands_nested_dict))
+            else:
+                input_text = session.prompt(pre_command_text, auto_suggest=AutoSuggestFromHistory(),
+                                            completer=WordCompleter(comands_list, meta_dict=comands_list_meta_dict,
+                                                                    sentence=True))
+        else:
+            input_text = input(pre_command_text)
 
         command = parce(input_text)
         if command:
