@@ -69,6 +69,7 @@ class Phone(Field):
 
 
 
+
 class Birthday(Field):
     def is_valid(self, value):
         try:
@@ -194,12 +195,8 @@ class AddressBook(UserDict):
         except:
             pass
 
-
-
-phone1 = Phone('380601234567')
-phone2 = Phone('+380(60)410-38-75')
-phone3 = Phone('+38(096)5179199')
-print(phone1)
-print(phone2)
-print(phone3)
-
+    def get_data_list(self):
+        data_list = []
+        for k in self.data:
+            data_list.append(k)
+        return data_list
