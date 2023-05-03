@@ -304,8 +304,7 @@ def sortnote(args):
 @error_handler    
 def reference(args):
     with open('readme.txt', encoding="utf-8") as file:
-            for line in file:
-                return line
+        return file.read()
 
 
 handlers = {"hello": {"func": handler_greetings,
