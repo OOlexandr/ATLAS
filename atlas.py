@@ -274,26 +274,27 @@ def handler_add_note_tag(args):
 
 @error_handler
 def find_note(args):
-    if len(args) == 0:
-        raise TextNotGivenError
-    text = ' '.join(args)
-    found_notes = notes.notes_search_content(text)
-
-    found_note_text_list = []
-    if found_notes:
-            found_note_text_list.append(f"*Name:\n\t{found_note.name.value}\n*Text:\n\t{found_note.text.value}\n*Tags:\n\t{found_note.tags.value}")
-
-        # if use_modal_window and len(found_note_text_list) == 1:
-        if use_modal_window:
-
-            message_dialog(title='Found note:', text=found_note_text_list[0]).run()
-
-        else:
-            message = "found notes are:\n"
-            return message.split(found_note_text_list, "\n\n")
-
-    else:
-        return "No notes found"
+    pass
+    # if len(args) == 0:
+    #     raise TextNotGivenError
+    # text = ' '.join(args)
+    # found_notes = notes.notes_search_content(text)
+    #
+    # found_note_text_list = []
+    # if found_notes:
+    #         found_note_text_list.append(f"*Name:\n\t{found_note.name.value}\n*Text:\n\t{found_note.text.value}\n*Tags:\n\t{found_note.tags.value}")
+    #
+    #     # if use_modal_window and len(found_note_text_list) == 1:
+    #     if use_modal_window:
+    #
+    #         message_dialog(title='Found note:', text=found_note_text_list[0]).run()
+    #
+    #     else:
+    #         message = "found notes are:\n"
+    #         return message.split(found_note_text_list, "\n\n")
+    #
+    # else:
+    #     return "No notes found"
 
 
 @error_handler
