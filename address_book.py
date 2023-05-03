@@ -43,15 +43,14 @@ class Phone(Field):
         super().__init__(value)
 
     def __str__(self) -> str:
-        return self.value
+        return self.normalize_number(self.value)
     
     def __repr__(self) -> str:
-        return self.value
+        return self.normalize_number(self.value)
 
     def is_valid(self, value):
 
         value = value.strip()
-        
         if re.match(r"(\+380\(\d{2}\)\d{3}\-(?:(?=\d{2}-)(\d{2}-\d{2})|(\d-\d{3})))", value):
             return  value
         elif re.match(r"^\d{12}$", value):
@@ -62,6 +61,13 @@ class Phone(Field):
             return value
         else:
             raise InvalidPhoneError
+    
+    def normalize_number(self, number):
+        number = self.is_valid(number)
+        number = re.sub(r'\D', '', number)
+        return f'+{number[-12:]}'
+
+
 
 
 class Birthday(Field):
