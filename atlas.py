@@ -269,7 +269,7 @@ def find_note(args):
     if found_notes:
         message = "found notes are:\n"
         for n in found_notes:
-            message += "\n" + n.text.value
+            message += "\n" + str(n)
         return message
     return "No notes found"
 

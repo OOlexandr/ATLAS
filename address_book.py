@@ -39,6 +39,8 @@ class Phone(Field):
         else:
             raise InvalidPhoneError
 
+
+
 class Birthday(Field):
     def is_valid(self, value):
         try:
@@ -160,3 +162,15 @@ class AddressBook(UserDict):
                     self.data = copy.deepcopy(content)
         except:
             pass
+
+
+# phone1 = Phone('380601234567')
+# phone2 = Phone(+380604103875)
+# phone3 = Phone('+38(096)5179199')
+# phone4 = Phone('38-066-123-4567', 'Valeriia')
+
+# print(phone1)
+# print(phone2)
+# print(phone3)
+
+# print(phone4)

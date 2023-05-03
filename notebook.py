@@ -48,6 +48,7 @@ class Note:
     def __init__(self, name: Name, text: NoteText, tags: list[Tag] = None) -> None:
         self.name = name
         self.text = text
+
         #  Гиевский 02052023 - переделал если параметр tag заходит то tags так и останется списком
         self.tags = [tags] if tags else []
         # self.tags = []
@@ -58,7 +59,13 @@ class Note:
     # Gievskiy 02052023
     def add_note_tag(self, tag:Tag):
         self.tags.append(tag)
+
+    def __str__(self) -> str:
+        return f'Note : {self.name}, {self.text}, {self.tags}'
     
+    def __repr__(self) -> str:
+        return f'Note : {self.name}, {self.text}, {self.tags}'
+
     @property
     def text(self):
         return self.__text
@@ -73,6 +80,12 @@ class Notebook(UserList):
     def __init__(self):
         super().__init__()
         self.file_name = 'notes_12_team.bin'
+
+    def __str__(self) -> str:
+        return super().__str__()
+    
+    def __repr__(self) -> str:
+        return super().__repr__()
         
     def notes_search_content(self, query):
         matching_notes = []
