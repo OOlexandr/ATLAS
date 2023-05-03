@@ -34,7 +34,10 @@ commands = [("hello", "gretting"),
             ("show all", "shows with division on pages"),
             ("find not", "not found"),
             ("find a", "found carl, sam"),
-            ("find 60-14", "finds johny")]
+            ("find 60-14", "finds johny"),
+            ("ch note text1 text2 Igor", "text1 -> text2 Igor"), # Gievskiy
+            ("ch note text1 text2", "text1 -> text2") # Gievskiy
+            ]
 #Бачу можливість зробити вивід зручнішим для читання. 
 #Замість того, щоб всі команди були в одному списку можна розбити його на підсписки,
 #кожен з яких буде відповідати за тестування певного модуля.

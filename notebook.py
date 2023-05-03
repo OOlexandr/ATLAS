@@ -75,6 +75,21 @@ class Notebook(UserList):
                     matching_notes.append(note)
         return matching_notes
     
+    # Gievskiy 02052023
+    def notes_search_text(self, query, txt2, name_note = None):
+        if self.data:
+            for note in self.data:
+                if name_note.value == note.name.value:
+                    if re.findall(query, note.text.value, re.IGNORECASE):
+                        re.sub(query, txt2, note.text.value)
+                    return f'in a note with a name {name_note.value} changed the text {query} to {txt2}'
+                    
+                else:    
+                    if re.findall(query, note.text.value, re.IGNORECASE):
+                        re.sub(query, txt2, note.text.value)
+                    return f'in a note changed the text {query} to {txt2}'
+    # ****
+
     def save_notes_to_file(self):
         with open(self.file_name, 'wb') as fh:
             pickle.dump(self, fh)

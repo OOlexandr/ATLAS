@@ -191,7 +191,6 @@ def find(args):
     else:
         return "No contacts were found"
 
-
 @error_handler
 def export(args):
     if contacts:
@@ -228,6 +227,22 @@ def handler_addnote(args):
     notes.append(note)
     notes.save_notes_to_file()
     return "Note added successfully"
+
+# Gievskiy
+@error_handler
+def handler_change_note(args):
+    if len(args) < 2:
+        raise TextNotGivenError
+    elif len(args) == 2:
+        old_ch_text = NoteText(args[1])
+        new_ch_text = NoteText(args[2])
+    elif len(args) == 3:
+        old_ch_text = NoteText(args[1])
+        new_ch_text = NoteText(args[2])
+        title = Name(args[3])
+    
+    notes.notes_search_text(old_ch_text, new_ch_text, title)
+    
 
 @error_handler
 def find_note(args):
@@ -275,6 +290,7 @@ handlers = {"hello": {"func": handler_greetings, "help_message": "Just greeting!
             "find": {"func": find, "help_message": "find ContactName"},
             "sort": {"func": sort, "help_message": "sort FolderPath"},
             "delnote": {"func": delete_note, "help_message": "delnote NoteName"},
+            "ch note": {"func": handler_change_note, "help_message": "ch note NoteName"}, #Gievskiy 02052023
             "help": {"func": reference, "help_message": "help NoteName"},
             "export": {"func": export, "help_message": "export NoteName"},
             "add note": {"func": handler_addnote, "help_message": "add note name text"}}
