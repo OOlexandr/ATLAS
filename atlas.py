@@ -216,9 +216,10 @@ def sort(args):
     main_sort(args[0])
     return "Files sorted succesfully"
 
+
 # my code
 @error_handler
-def handler_addnote(args):
+def handler_add_note(args):
     if len(args) < 2:
         raise TextNotGivenError
     title = Name(args[0])
@@ -228,6 +229,40 @@ def handler_addnote(args):
     notes.save_notes_to_file()
     return "Note added successfully"
 
+
+# Gievskiy 02052023
+@error_handler
+def handler_add_note_tag(args):
+    note_name = None
+    if len(args) < 2:
+        raise TextNotGivenError
+
+    title = Name(args[0])
+    tag = Tag(args[1])
+
+    # У нас список, а не словарь
+    # note = notes.get(title.value)
+
+    for i, l in enumerate(notes):
+        if l.name.value == title.value:
+            text = l.text.value
+            note_name = l
+            break
+
+    if not note_name:
+        text = NoteText(' '.join(args[1:]))  # обязательный параметр
+        note: Note = Note(title, text, tag)
+        notes.append(note)
+        return f"{title.value}, {text.value}, {tag.value} has been added to the NoteBook"
+    else:
+        note_name.add_note_tag(tag)
+        text_tag = ''
+        for i in note_name.tags:
+            text_tag += ' ' + i.value if text_tag != '' else i.value
+        return f"{note_name.name.value}, {note_name.text.value}, {text_tag} has been added to the NoteBook"
+
+# **** 02052023
+
 # Gievskiy
 @error_handler
 def handler_change_note(args):
@@ -236,6 +271,7 @@ def handler_change_note(args):
     elif len(args) == 2:
         old_ch_text = str(args[0])
         new_ch_text = str(args[1])
+        name_note = None
     elif len(args) == 3:
         old_ch_text = str(args[0])
         new_ch_text = str(args[1])
@@ -275,25 +311,58 @@ def reference(args):
                 return line
 
 
-handlers = {"hello": {"func": handler_greetings, "help_message": "Just greeting!"},
-            "good bye": {"func": handler_exit, "help_message": "exit from bot"},
-            "close": {"func": handler_exit, "help_message": "exit from bot"},
-            "exit": {"func": handler_exit, "help_message": "exit from bot"},
-            "add record": {"func": handler_add, "help_message": "add record ContactName ContactPhone Contactbirthday"},
-            "add birthday": {"func": handler_add_birthday, "help_message": "add birthday ContactName Contactbirthday"},
-            "add phone": {"func": handler_add_phone, "help_message": "add phone ContactName ContactPhone"},
-            "change": {"func": handler_change, "help_message": "change ContactName OldPhone NewPhone"},
-            "phone": {"func": handler_phone, "help_message": "phone ContactName"},
-            "days to birthday": {"func": handler_days_to_birthday, "help_message": "days to birthday ContactName"},
-            "show all": {"func": handler_show_all, "help_message": "showed all contacts"},
-            "find note": {"func": find_note, "help_message": "find NoteText"},
-            "find": {"func": find, "help_message": "find ContactName"},
-            "sort": {"func": sort, "help_message": "sort FolderPath"},
-            "delnote": {"func": delete_note, "help_message": "delnote NoteName"},
-            "ch note": {"func": handler_change_note, "help_message": "ch note NoteName"}, #Gievskiy 02052023
-            "help": {"func": reference, "help_message": "help NoteName"},
-            "export": {"func": export, "help_message": "export NoteName"},
-            "add note": {"func": handler_addnote, "help_message": "add note name text"}}
+handlers = {"hello": {"func": handler_greetings,
+                      "help_message": "Just greeting!"},
+            "goodbye": {"func": handler_exit,
+                        "help_message": "exit from bot"},
+            "close": {"func": handler_exit,
+                      "help_message": "exit from bot"},
+            "exit": {"func": handler_exit,
+                     "help_message": "exit from bot"},
+            "addrecord": {"func": handler_add,
+                          "help_message": "addrecord ContactName ContactPhone Contactbirthday"},
+            "addbirthday": {"func": handler_add_birthday,
+                            "help_message": "addbirthday ContactName Contactbirthday",
+                            "from_data": contacts},
+            "addphone": {"func": handler_add_phone,
+                         "help_message": "addphone ContactName ContactPhone",
+                         "from_data": contacts},
+            "change": {"func": handler_change,
+                       "help_message": "change ContactName OldPhone NewPhone",
+                       "from_data": contacts},
+            "phone": {"func": handler_phone,
+                      "help_message": "phone ContactName",
+                      "from_data": contacts},
+            "daystobirthday": {"func": handler_days_to_birthday,
+                               "help_message": "daystobirthday ContactName",
+                               "from_data": contacts},
+            "showall": {"func": handler_show_all,
+                        "help_message": "showed all contacts"},
+            "findnote": {"func": find_note,
+                         "help_message": "findnote NoteText"},
+            "find": {"func": find,
+                     "help_message": "find ContactName",
+                     "from_data": contacts},
+            "delnote": {"func": delete_note,
+                        "help_message": "delnote NoteName",
+                        "from_data": notes},
+            "sortnote": {"func": sortnote,
+                        "help_message": "sortnote",
+                        "nested_dict": {"name": {"inc": None, "dec": None}, "text": {"inc": None, "dec": None}}},
+            "sort": {"func": sort,
+                     "help_message": "sort FolderPath"},
+            # Gievskiy 02052023 
+            "add note": {"func": handler_add_note,
+                        "help_message": "add note NoteName"},
+            "add tag": {"func": handler_add_note_tag,
+                       "help_message": "add tag note NoteName"},
+            "ch note": {"func": handler_change_note,
+                       "help_message": "ch note  txt1 txt2 NoteName"},           
+            # **** 02052023
+            "help": {"func": reference,
+                     "help_message": "help info ReadMe"},
+            "export": {"func": export,
+                       "help_message": "export notes into file contacts.csv"}}
 
 
 # key - command, value - handler.
