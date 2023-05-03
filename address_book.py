@@ -31,36 +31,29 @@ class Name(Field):
             raise InvalidNameError
 
 class Phone(Field):
+    def __init__(self, value):
+        super().__init__(value)
+
+    def __str__(self) -> str:
+        return self.value
+    
+    def __repr__(self) -> str:
+        return self.value
+
     def is_valid(self, value):
-        #must upgrade.
+        
         value = value.strip()
-        if re.fullmatch(r"(\+380\(\d{2}\)\d{3}\-(?:(?=\d{2}-)(\d{2}-\d{2})|(\d-\d{3})))", value):
-            return True
+        
+        if re.match(r"(\+380\(\d{2}\)\d{3}\-(?:(?=\d{2}-)(\d{2}-\d{2})|(\d-\d{3})))", value):
+            return  value
+        elif re.match(r"^\d{12}$", value):
+            return f'{value}'
+        elif re.match(r"^\+?\d{12}$", value):
+            return value
+        elif re.match(r"\+\d{2}\(\d{3}\)\d{7}", value):
+            return value
         else:
             raise InvalidPhoneError
-        
-    def __init__(self, number, name):
-        self.name = name
-        self.mask_patterns = [
-
-            r'^\d{12}$',
-            r'^\+?\d{12}$', 
-            r'\+\d{2}\(\d{3}\)\d{7}'
-        ]
-
-        self.number = self.normalize_number(number)
-
-    def __str__(self):
-        return f'{self.name}: {self.number}'
-    
-    def normalize_number(self, number):
-    
-        for pattern in self.mask_patterns:
-            match = re.match(pattern, number)
-            number = re.sub(r'[()]', '', number)
-            if match:
-                return f'+{number[-12:]}'
-        raise ValueError('Invalid phone number format')
 
 class Birthday(Field):
     def is_valid(self, value):
