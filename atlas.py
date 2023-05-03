@@ -107,7 +107,6 @@ def handler_add(args):
     contacts.add_record(name, phone, birthday)
     return "Contact was added succesfully"
 
-
 @error_handler
 def handler_change(args):
     if len(args) < 3:
@@ -219,7 +218,7 @@ def sort(args):
 
 # my code
 @error_handler
-def handler_addnote(args):
+def handler_add_note(args):
     if len(args) < 2:
         raise TextNotGivenError
     title = Name(args[0])
@@ -228,6 +227,38 @@ def handler_addnote(args):
     notes.append(note)
     notes.save_notes_to_file()
     return "Note added successfully"
+
+# Gievskiy 02052023
+@error_handler
+def handler_add_note_tag(args):
+    note_name = None
+    if len(args) < 2:
+        raise TextNotGivenError
+    
+    title = Name(args[0])
+    tag = Tag(args[1])
+    
+    # У нас список, а не словарь
+    # note = notes.get(title.value)
+
+    for i, l in enumerate(notes):
+       if l.name.value == title.value:
+           text = l.text.value
+           note_name = l
+           break
+    
+    if not note_name:
+        text = NoteText(' '.join(args[1:])) #  обязательный параметр
+        note: Note  = Note(title, text, tag)
+        notes.append(note)
+        return f"{title.value}, {text.value}, {tag.value} has been added to the NoteBook"
+    else:
+        note_name.add_note_tag(tag)
+        text_tag =''
+        for i in note_name.tags:
+            text_tag += ' ' + i.value if text_tag != '' else i.value
+        return f"{note_name.name.value}, {note_name.text.value}, {text_tag} has been added to the NoteBook"
+# **** 02052023
 
 @error_handler
 def find_note(args):
@@ -275,6 +306,10 @@ handlers = {"hello": {"func": handler_greetings, "help_message": "Just greeting!
             "find": {"func": find, "help_message": "find ContactName"},
             "sort": {"func": sort, "help_message": "sort FolderPath"},
             "delnote": {"func": delete_note, "help_message": "delnote NoteName"},
+            # Gievskiy 02052023
+            "add note": {"func": handler_add_note, "help_message": "add note NoteName"},
+            "add tag": {"func": handler_add_note_tag, "help_message": "add tag note NoteName"},
+            # **** 02052023
             "help": {"func": reference, "help_message": "help NoteName"},
             "export": {"func": export, "help_message": "export NoteName"},
             "add note": {"func": handler_addnote, "help_message": "add note name text"}}

@@ -19,7 +19,7 @@ class InvalidNameError(Exception):
 
 class Name(Field):
     def is_valid(self, value):
-        if type(value) == str:
+        if type(value) == str: 
             return True
         else:
             raise InvalidNameError
@@ -48,9 +48,17 @@ class Note:
     def __init__(self, name: Name, text: NoteText, tags: list[Tag] = None) -> None:
         self.name = name
         self.text = text
-        self.tags = []
-        if tags:
-            self.tags += tags
+
+        #  Гиевский 02052023 - переделал если параметр tag заходит то tags так и останется списком
+        self.tags = [tags] if tags else []
+        # self.tags = []
+        #  Гиевский 02052023 - Закоментировал, так как дабовление в список происходит через .append
+        # if tags:
+        #     self.tags += tags
+    
+    # Gievskiy 02052023
+    def add_note_tag(self, tag:Tag):
+        self.tags.append(tag)
 
     def __str__(self) -> str:
         return f'Note : {self.name}, {self.text}, {self.tags}'
@@ -86,7 +94,7 @@ class Notebook(UserList):
                 if re.search(query, note.text.value, re.IGNORECASE):
                     matching_notes.append(note)
         return matching_notes
-    
+        
     def save_notes_to_file(self):
         with open(self.file_name, 'wb') as fh:
             pickle.dump(self, fh)
@@ -107,3 +115,7 @@ class Notebook(UserList):
                     self.data.remove(note)
                     return True
         return False
+    
+    
+    
+      
