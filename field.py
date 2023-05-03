@@ -10,3 +10,9 @@ class Field:
     def value(self, value):
         if self.is_valid(value):
             self.__value = value
+    
+    def __str__(self):
+        return str(self.value)
+    
+    def __repr__(self):
+        return repr(self.value)
