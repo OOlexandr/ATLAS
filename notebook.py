@@ -107,7 +107,13 @@ class Notebook(UserList):
                     self.data = copy.deepcopy(notes.data)
         except:
             pass
-            
+
+    def delete_all_notes(self):
+        self.data.clear()
+
+    def show_all_notes(self):
+        return "\n\n".join([str(i) for i in self.data])
+
     def delete_note(self, note_name: str):
         if note_name:
             for note in self.data:

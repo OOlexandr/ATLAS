@@ -219,6 +219,19 @@ def export(args):
     else:
         return "Contact list is empty."
 
+@error_handler
+def delete_all_notes(args):
+    notes.delete_all_notes()
+    return "Your notes are crear!"
+
+@error_handler
+def show_all_notes(args):
+
+    notes_text = notes.show_all_notes()
+    if notes_text:
+        return notes_text
+    else:
+        return "Notebook is empty."
 
 
 @error_handler
@@ -379,10 +392,15 @@ handlers = {"hello": {"func": handler_greetings,
                        "help_message": "addtag NoteName tag",
                        "from_data": notes.get_data_list},
             # **** 02052023
-            "help": {"func": reference, "help_message":
-                    "help NoteName"},
+            "help": {"func": reference,
+                     "help_message": "help NoteName"},
             "export": {"func": export,
-                      "help_message": "export NoteName"}}
+                      "help_message": "export NoteName"},
+            "deleteallnotes": {"func": delete_all_notes,
+                        "help_message": "delete all notes!!!"},
+            "showallnotes": {"func": show_all_notes,
+                        "help_message": "show all notes"}
+            }
 
 
 # key - command, value - handler.
