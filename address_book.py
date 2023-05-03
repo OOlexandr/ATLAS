@@ -39,11 +39,27 @@ class Name(Field):
 
 
 class Phone(Field):
+    def __init__(self, value):
+        super().__init__(value)
+
+    def __str__(self) -> str:
+        return self.value
+    
+    def __repr__(self) -> str:
+        return self.value
+
     def is_valid(self, value):
-        # must upgrade.
+
         value = value.strip()
-        if re.fullmatch(r"(\+380\(\d{2}\)\d{3}\-(?:(?=\d{2}-)(\d{2}-\d{2})|(\d-\d{3})))", value):
-            return True
+        
+        if re.match(r"(\+380\(\d{2}\)\d{3}\-(?:(?=\d{2}-)(\d{2}-\d{2})|(\d-\d{3})))", value):
+            return  value
+        elif re.match(r"^\d{12}$", value):
+            return f'{value}'
+        elif re.match(r"^\+?\d{12}$", value):
+            return value
+        elif re.match(r"\+\d{2}\(\d{3}\)\d{7}", value):
+            return value
         else:
             raise InvalidPhoneError
 
