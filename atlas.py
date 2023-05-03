@@ -298,7 +298,19 @@ def delete_note(args):
 
 @error_handler
 def sortnote(args):
-    pass
+    if len(args)==0:
+        return "Please give sorting criteria"
+    rev = False
+    if len(args)>=2:
+        if args[1] == "dec":
+            rev = True
+    if args[0] == 'name':
+        notes.sort(reverse = rev, key = lambda n: n.name.value)
+    elif args[0] == 'text':
+        notes.sort(reverse = rev, key = lambda n: n.text.value)
+    else:
+        return "Key is invalid"
+    return "Successfully sorted"
 
 
 @error_handler    
@@ -340,14 +352,14 @@ handlers = {"hello": {"func": handler_greetings,
             "find": {"func": find,
                      "help_message": "find ContactName",
                      "from_data": contacts},
-            "sort": {"func": sort,
-                     "help_message": "sort FolderPath"},
             "delnote": {"func": delete_note,
                         "help_message": "delnote NoteName",
                         "from_data": notes},
             "sortnote": {"func": sortnote,
                         "help_message": "sortnote",
                         "nested_dict": {"name": {"inc": None, "dec": None}, "text": {"inc": None, "dec": None}}},
+            "sort": {"func": sort,
+                     "help_message": "sort FolderPath"},
             # Gievskiy 02052023 
             "add note": {"func": handler_add_note,
                         "help_message": "add note NoteName"},
