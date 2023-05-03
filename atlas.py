@@ -116,6 +116,7 @@ def handler_add(args):
     contacts.add_record(name, phone, birthday)
     return "Contact was added succesfully"
 
+
 @error_handler
 def handler_change(args):
     if len(args) < 3:
@@ -205,7 +206,7 @@ def find(args):
 @error_handler
 def export(args):
     if contacts:
-    
+
         with open("contacts.csv", "w", newline="") as is_file:
             fieldnames = ["Name", "Phone", "Email"]
             writer = csv.DictWriter(is_file, fieldnames=fieldnames)
@@ -219,13 +220,13 @@ def export(args):
         return "Contact list is empty."
 
 
-
 @error_handler
 def sort(args):
     if len(args) == 0:
         raise PathNotGivenError
     main_sort(args[0])
     return "Files sorted successfully"
+
 
 # my code
 @error_handler
@@ -239,36 +240,39 @@ def handler_add_note(args):
     notes.save_notes_to_file()
     return "Note added successfully"
 
+
 # Gievskiy 02052023
 @error_handler
 def handler_add_note_tag(args):
     note_name = None
     if len(args) < 2:
         raise TextNotGivenError
-    
+
     title = Name(args[0])
     tag = Tag(args[1])
-    
+
     # У нас список, а не словарь
     # note = notes.get(title.value)
 
     for i, l in enumerate(notes):
-       if l.name.value == title.value:
-           text = l.text.value
-           note_name = l
-           break
-    
+        if l.name.value == title.value:
+            text = l.text.value
+            note_name = l
+            break
+
     if not note_name:
-        text = NoteText(' '.join(args[1:])) #  обязательный параметр
-        note: Note  = Note(title, text, tag)
+        text = NoteText(' '.join(args[1:]))  # обязательный параметр
+        note: Note = Note(title, text, tag)
         notes.append(note)
         return f"{title.value}, {text.value}, {tag.value} has been added to the NoteBook"
     else:
         note_name.add_note_tag(tag)
-        text_tag =''
+        text_tag = ''
         for i in note_name.tags:
             text_tag += ' ' + i.value if text_tag != '' else i.value
         return f"{note_name.name.value}, {note_name.text.value}, {text_tag} has been added to the NoteBook"
+
+
 # **** 02052023
 
 @error_handler
@@ -301,7 +305,7 @@ def sortnote(args):
     pass
 
 
-@error_handler    
+@error_handler
 def reference(args):
     with open('readme.txt', encoding="utf-8") as file:
         return file.read()
@@ -345,18 +349,18 @@ handlers = {"hello": {"func": handler_greetings,
                         "help_message": "delnote NoteName",
                         "from_data": notes},
             "sortnote": {"func": sortnote,
-                        "help_message": "sortnote",
-                        "nested_dict": {"name": {"inc": None, "dec": None}, "text": {"inc": None, "dec": None}}},
-            # Gievskiy 02052023 
-            "add note": {"func": handler_add_note,
-                        "help_message": "add note NoteName"},
-            "add tag": {"func": handler_add_note_tag,
-                       "help_message": "add tag note NoteName"},
+                         "help_message": "sortnote",
+                         "nested_dict": {"name": {"inc": None, "dec": None}, "text": {"inc": None, "dec": None}}},
+            # Gievskiy 02052023
+            "addnote": {"func": handler_add_note,
+                        "help_message": "addnote NoteName text"},
+            "addtag": {"func": handler_add_note_tag,
+                       "help_message": "addtag NoteName tag"},
             # **** 02052023
-            "help": {"func": reference, "help_message":
-                    "help NoteName"},
+            "help": {"func": reference,
+                     "help_message": "help info ReadMe"},
             "export": {"func": export,
-                      "help_message": "export NoteName"}}
+                       "help_message": "export notes into file contacts.csv"}}
 
 
 # key - command, value - handler.
@@ -401,7 +405,6 @@ def create_completer_data():
 
 
 def update_nested_dict():
-
     global comands_nested_dict
 
     for command_name, params_dict in handlers.items():
@@ -418,9 +421,7 @@ def update_nested_dict():
                                                               sentence=True, meta_dict=meta_dict)
         nested_dict = params_dict.get("nested_dict")
         if nested_dict:
-
             comands_nested_dict[command_name] = nested_dict
-
 
 
 def main():
