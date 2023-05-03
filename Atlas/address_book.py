@@ -3,7 +3,7 @@ from datetime import date
 import copy
 import re
 import pickle
-from field import Field
+from Atlas.field import Field
 
 
 class RecordAlreadyExists(Exception):

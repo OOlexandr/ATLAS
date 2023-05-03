@@ -1,5 +1,5 @@
 from pathlib import Path
-from norm import normalise
+from Atlas.norm import normalise
 
 def move_file(file:Path, root:Path, category:str):
     target_folder = root / category
