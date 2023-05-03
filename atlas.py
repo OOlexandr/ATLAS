@@ -225,24 +225,43 @@ def delete_note(args):
         return f"Can't delete note: {note_name}!"
 
 
-handlers = {"hello": {"func": handler_greetings, "help_message": "Just greeting!"},
-            "goodbye": {"func": handler_exit, "help_message": "exit from bot"},
-            "close": {"func": handler_exit, "help_message": "exit from bot"},
-            "exit": {"func": handler_exit, "help_message": "exit from bot"},
-            "addrecord": {"func": handler_add, "help_message": "add record ContactName ContactPhone Contactbirthday"},
-            "addbirthday": {"func": handler_add_birthday, "help_message": "add birthday ContactName Contactbirthday",
+handlers = {"hello": {"func": handler_greetings,
+                      "help_message": "Just greeting!"},
+            "goodbye": {"func": handler_exit,
+                        "help_message": "exit from bot"},
+            "close": {"func": handler_exit,
+                      "help_message": "exit from bot"},
+            "exit": {"func": handler_exit,
+                     "help_message": "exit from bot"},
+            "addrecord": {"func": handler_add,
+                          "help_message": "addrecord ContactName ContactPhone Contactbirthday"},
+            "addbirthday": {"func": handler_add_birthday,
+                            "help_message": "addbirthday ContactName Contactbirthday",
                             "from_data": contacts},
-            "addphone": {"func": handler_add_phone, "help_message": "add phone ContactName ContactPhone",
+            "addphone": {"func": handler_add_phone,
+                         "help_message": "addphone ContactName ContactPhone",
                          "from_data": contacts},
-            "change": {"func": handler_change, "help_message": "change ContactName OldPhone NewPhone",
+            "change": {"func": handler_change,
+                       "help_message": "change ContactName OldPhone NewPhone",
                        "from_data": contacts},
-            "phone": {"func": handler_phone, "help_message": "phone ContactName", "from_data": contacts},
-            "daystobirthday": {"func": handler_days_to_birthday, "help_message": "days to birthday ContactName"},
-            "showall": {"func": handler_show_all, "help_message": "showed all contacts"},
-            "findnote": {"func": find_note, "help_message": "find NoteText"},
-            "find": {"func": find, "help_message": "find ContactName", "from_data": contacts},
-            "sort": {"func": sort, "help_message": "sort FolderPath"},
-            "delnote": {"func": delete_note, "help_message": "delnote NoteName", "from_data": notes}}
+            "phone": {"func": handler_phone,
+                      "help_message": "phone ContactName",
+                      "from_data": contacts},
+            "daystobirthday": {"func": handler_days_to_birthday,
+                               "help_message": "daystobirthday ContactName",
+                               "from_data": contacts},
+            "showall": {"func": handler_show_all,
+                        "help_message": "showed all contacts"},
+            "findnote": {"func": find_note,
+                         "help_message": "findnote NoteText"},
+            "find": {"func": find,
+                     "help_message": "find ContactName",
+                     "from_data": contacts},
+            "sort": {"func": sort,
+                     "help_message": "sort FolderPath"},
+            "delnote": {"func": delete_note,
+                        "help_message": "delnote NoteName",
+                        "from_data": notes}}
 
 
 # key - command, value - handler.
@@ -287,23 +306,21 @@ def create_completer_data():
 
 
 def update_nested_dict():
-    # global need_nested_dict_udate
-    # if need_nested_dict_udate:
-    #     need_nested_dict_udate = False
+
     global comands_nested_dict
 
     for command_name, params_dict in handlers.items():
         from_data = params_dict.get("from_data")
 
-        _meta_dict = {}
-
         if from_data:
-            # print(f"command_name:{command_name} : {from_data.get_data_list()}")
+
+            meta_dict = {}
+
             for note_name in from_data.get_data_list():
-                _meta_dict.update({note_name: comands_list_meta_dict.get(command_name)})
+                meta_dict.update({note_name: comands_list_meta_dict.get(command_name)})
 
             comands_nested_dict[command_name] = WordCompleter(from_data.get_data_list(), match_middle=True,
-                                                              sentence=True, meta_dict=_meta_dict)
+                                                              sentence=True, meta_dict=meta_dict)
 
 
 def main():
