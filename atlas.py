@@ -5,6 +5,9 @@ import csv
 from prompt_toolkit import PromptSession
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 from prompt_toolkit.completion import WordCompleter
+from prompt_toolkit.completion import NestedCompleter
+
+from config import use_promt_toolkit, pre_command_text, use_nested_completer
 
 
 class NameNotGivenError(Exception):
@@ -28,6 +31,10 @@ class TextNotGivenError(Exception):
 
 
 class NoteNameNotGivenError(Exception):
+    pass
+
+
+class ContctNameNotGivenError(Exception):
     pass
 
 
@@ -67,6 +74,8 @@ def error_handler(func):
             return "Please enter text to find"
         except NoteNameNotGivenError:
             return "Please enter note name to delete"
+        except ContctNameNotGivenError:
+            return "Please enter contact name to find"
 
     return inner
 
@@ -179,6 +188,8 @@ def handler_show_all(args):
 
 @error_handler
 def find(args):
+    if len(args) == 0:
+        raise ContctNameNotGivenError
     records = contacts.find_records(args[0])
     if records:
         message = "Found contacts are:"
@@ -194,7 +205,7 @@ def find(args):
 @error_handler
 def export(args):
     if contacts:
-    
+
         with open("contacts.csv", "w", newline="") as is_file:
             fieldnames = ["Name", "Phone", "Email"]
             writer = csv.DictWriter(is_file, fieldnames=fieldnames)
@@ -208,13 +219,13 @@ def export(args):
         return "Contact list is empty."
 
 
-
 @error_handler
 def sort(args):
     if len(args) == 0:
         raise PathNotGivenError
     main_sort(args[0])
-    return "Files sorted succesfully"
+    return "Files sorted successfully"
+
 
 
 # my code
@@ -229,57 +240,6 @@ def handler_add_note(args):
     notes.save_notes_to_file()
     return "Note added successfully"
 
-
-# Gievskiy 02052023
-@error_handler
-def handler_add_note_tag(args):
-    note_name = None
-    if len(args) < 2:
-        raise TextNotGivenError
-
-    title = Name(args[0])
-    tag = Tag(args[1])
-
-    # У нас список, а не словарь
-    # note = notes.get(title.value)
-
-    for i, l in enumerate(notes):
-        if l.name.value == title.value:
-            text = l.text.value
-            note_name = l
-            break
-
-    if not note_name:
-        text = NoteText(' '.join(args[1:]))  # обязательный параметр
-        note: Note = Note(title, text, tag)
-        notes.append(note)
-        return f"{title.value}, {text.value}, {tag.value} has been added to the NoteBook"
-    else:
-        note_name.add_note_tag(tag)
-        text_tag = ''
-        for i in note_name.tags:
-            text_tag += ' ' + i.value if text_tag != '' else i.value
-        return f"{note_name.name.value}, {note_name.text.value}, {text_tag} has been added to the NoteBook"
-
-# **** 02052023
-
-# Gievskiy
-@error_handler
-def handler_change_note(args):
-    if len(args) < 1:
-        raise TextNotGivenError
-    elif len(args) == 2:
-        old_ch_text = str(args[0])
-        new_ch_text = str(args[1])
-        name_note = None
-    elif len(args) == 3:
-        old_ch_text = str(args[0])
-        new_ch_text = str(args[1])
-        name_note = Name(args[2])
-    
-    notes.notes_change_text(old_ch_text, new_ch_text, name_note)
-    
-
 @error_handler
 def find_note(args):
     if len(args) == 0:
@@ -289,7 +249,7 @@ def find_note(args):
     if found_notes:
         message = "found notes are:\n"
         for n in found_notes:
-            message += "\n" + n.text.value
+            message += "\n" + str(n)
         return message
     return "No notes found"
 
@@ -304,65 +264,48 @@ def delete_note(args):
     else:
         return f"Can't delete note: {note_name}!"
 
-@error_handler    
+
+@error_handler
+def sortnote(args):
+    if len(args)==0:
+        return "Please give sorting criteria"
+    rev = False
+    if len(args)>=2:
+        if args[1] == "dec":
+            rev = True
+    if args[0] == 'name':
+        notes.sort(reverse = rev, key = lambda n: n.name.value)
+    elif args[0] == 'text':
+        notes.sort(reverse = rev, key = lambda n: n.text.value)
+    else:
+        return "Key is invalid"
+    return "Successfully sorted"
+
+
+@error_handler
 def reference(args):
     with open('readme.txt', encoding="utf-8") as file:
-            for line in file:
-                return line
+        return file.read()
 
 
-handlers = {"hello": {"func": handler_greetings,
-                      "help_message": "Just greeting!"},
-            "goodbye": {"func": handler_exit,
-                        "help_message": "exit from bot"},
-            "close": {"func": handler_exit,
-                      "help_message": "exit from bot"},
-            "exit": {"func": handler_exit,
-                     "help_message": "exit from bot"},
-            "addrecord": {"func": handler_add,
-                          "help_message": "addrecord ContactName ContactPhone Contactbirthday"},
-            "addbirthday": {"func": handler_add_birthday,
-                            "help_message": "addbirthday ContactName Contactbirthday",
-                            "from_data": contacts},
-            "addphone": {"func": handler_add_phone,
-                         "help_message": "addphone ContactName ContactPhone",
-                         "from_data": contacts},
-            "change": {"func": handler_change,
-                       "help_message": "change ContactName OldPhone NewPhone",
-                       "from_data": contacts},
-            "phone": {"func": handler_phone,
-                      "help_message": "phone ContactName",
-                      "from_data": contacts},
-            "daystobirthday": {"func": handler_days_to_birthday,
-                               "help_message": "daystobirthday ContactName",
-                               "from_data": contacts},
-            "showall": {"func": handler_show_all,
-                        "help_message": "showed all contacts"},
-            "findnote": {"func": find_note,
-                         "help_message": "findnote NoteText"},
-            "find": {"func": find,
-                     "help_message": "find ContactName",
-                     "from_data": contacts},
-            "delnote": {"func": delete_note,
-                        "help_message": "delnote NoteName",
-                        "from_data": notes},
-            "sortnote": {"func": sortnote,
-                        "help_message": "sortnote",
-                        "nested_dict": {"name": {"inc": None, "dec": None}, "text": {"inc": None, "dec": None}}},
-            "sort": {"func": sort,
-                     "help_message": "sort FolderPath"},
-            # Gievskiy 02052023 
-            "add note": {"func": handler_add_note,
-                        "help_message": "add note NoteName"},
-            "add tag": {"func": handler_add_note_tag,
-                       "help_message": "add tag note NoteName"},
-            "ch note": {"func": handler_change_note,
-                       "help_message": "ch note  txt1 txt2 NoteName"},           
-            # **** 02052023
-            "help": {"func": reference,
-                     "help_message": "help info ReadMe"},
-            "export": {"func": export,
-                       "help_message": "export notes into file contacts.csv"}}
+handlers = {"hello": {"func": handler_greetings, "help_message": "Just greeting!"},
+            "good bye": {"func": handler_exit, "help_message": "exit from bot"},
+            "close": {"func": handler_exit, "help_message": "exit from bot"},
+            "exit": {"func": handler_exit, "help_message": "exit from bot"},
+            "add record": {"func": handler_add, "help_message": "add record ContactName ContactPhone Contactbirthday"},
+            "add birthday": {"func": handler_add_birthday, "help_message": "add birthday ContactName Contactbirthday"},
+            "add phone": {"func": handler_add_phone, "help_message": "add phone ContactName ContactPhone"},
+            "change": {"func": handler_change, "help_message": "change ContactName OldPhone NewPhone"},
+            "phone": {"func": handler_phone, "help_message": "phone ContactName"},
+            "days to birthday": {"func": handler_days_to_birthday, "help_message": "days to birthday ContactName"},
+            "show all": {"func": handler_show_all, "help_message": "showed all contacts"},
+            "find note": {"func": find_note, "help_message": "find NoteText"},
+            "find": {"func": find, "help_message": "find ContactName"},
+            "sort": {"func": sort, "help_message": "sort FolderPath"},
+            "delnote": {"func": delete_note, "help_message": "delnote NoteName"},
+            "help": {"func": reference, "help_message": "help NoteName"},
+            "export": {"func": export, "help_message": "export NoteName"},
+            "add note": {"func": handler_addnote, "help_message": "add note name text"}}
 
 
 # key - command, value - handler.
@@ -384,23 +327,71 @@ def parce(command):
     return None
 
 
+comands_nested_dict = {}
 comands_list = []
 comands_list_meta_dict = {}
 
-for k, v in handlers.items():
-    comands_list.append(k)
-    comands_list_meta_dict.update({k: v["help_message"]})
+
+def create_completer_data():
+    global comands_nested_dict
+    global comands_list_meta_dict
+    global comands_list
+
+    if use_nested_completer:
+
+        for k, v in handlers.items():
+            comands_nested_dict.update({k: None})
+            comands_list_meta_dict.update({k: v["help_message"]})
+    else:
+
+        for k, v in handlers.items():
+            comands_list.append(k)
+            comands_list_meta_dict.update({k: v["help_message"]})
+
+
+def update_nested_dict():
+    global comands_nested_dict
+
+    for command_name, params_dict in handlers.items():
+        from_data = params_dict.get("from_data")
+
+        if from_data:
+
+            meta_dict = {}
+
+            for note_name in from_data.get_data_list():
+                meta_dict.update({note_name: comands_list_meta_dict.get(command_name)})
+
+            comands_nested_dict[command_name] = WordCompleter(from_data.get_data_list(), match_middle=True,
+                                                              sentence=True, meta_dict=meta_dict)
+        nested_dict = params_dict.get("nested_dict")
+        if nested_dict:
+            comands_nested_dict[command_name] = nested_dict
 
 
 def main():
-    session = PromptSession()
     contacts.read_contacts()
     notes.load_notes_from_file()
+
+    if use_promt_toolkit:
+        create_completer_data()
+        session = PromptSession()
+
     while True:
 
-        input_text = session.prompt('Input command >>> ', auto_suggest=AutoSuggestFromHistory(),
-                                    completer=WordCompleter(comands_list, meta_dict=comands_list_meta_dict,
-                                                            sentence=True))
+        if use_promt_toolkit:
+
+            update_nested_dict()
+
+            if use_nested_completer:
+                input_text = session.prompt(pre_command_text, auto_suggest=AutoSuggestFromHistory(),
+                                            completer=NestedCompleter.from_nested_dict(comands_nested_dict))
+            else:
+                input_text = session.prompt(pre_command_text, auto_suggest=AutoSuggestFromHistory(),
+                                            completer=WordCompleter(comands_list, meta_dict=comands_list_meta_dict,
+                                                                    sentence=True))
+        else:
+            input_text = input(pre_command_text)
 
         command = parce(input_text)
         if command:
@@ -416,3 +407,5 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+

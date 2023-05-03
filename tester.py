@@ -35,9 +35,9 @@ commands = [("hello", "gretting"),
             ("find not", "not found"),
             ("find a", "found carl, sam"),
             ("find 60-14", "finds johny"),
-            ("ch note text1 text2 Igor", "text1 -> text2 Igor"), # Gievskiy
-            ("ch note text1 text2", "text1 -> text2") # Gievskiy
-            ]
+            ("add note Igor Hello", "add note"),  #Gievskiy 05022023
+            ("add tag Igor tag1", "add tag")  #Gievskiy 05022023
+            ] 
 #Бачу можливість зробити вивід зручнішим для читання. 
 #Замість того, щоб всі команди були в одному списку можна розбити його на підсписки,
 #кожен з яких буде відповідати за тестування певного модуля.
