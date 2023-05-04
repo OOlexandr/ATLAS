@@ -103,13 +103,13 @@ class Notebook(UserList):
                 if name_note != None:
                     if name_note.value == note.name.value:
                         if re.findall(txt1, note.text.value, re.IGNORECASE):
-                            note.text.value.replace(txt1, txt2)
-                            # new_text = re.sub(txt1, txt2, note.text.value)
+                            # note.text.value = note.text.value.replace(txt1, txt2)
+                            note.text.value = re.sub(txt1, txt2, note.text.value)
                         return f'in a note with a name {name_note.value} changed the text {txt1} to {txt2}, {note.text.value}'
                 
                 else:    
                     if re.findall(txt1, note.text.value, re.IGNORECASE):
-                        re.sub(txt1, txt2, note.text.value)
+                        note.text.value = re.sub(txt1, txt2, note.text.value)
                         # note.text.value.replace(txt1, txt2)
                     return f'in a note changed the text {txt1} to {txt2}'
     # ****

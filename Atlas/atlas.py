@@ -269,6 +269,52 @@ def delete_note(args):
     else:
         return f"Can't delete note: {note_name}!"
 
+# Gievskiy
+
+@error_handler
+def handler_add_note_tag(args):
+    note_name = None
+    if len(args) < 2:
+        raise TextNotGivenError
+
+    title = Name(args[0])
+    tag = Tag(args[1])
+
+    # У нас список, а не словарь
+    # note = notes.get(title.value)
+
+    for i, l in enumerate(notes):
+       if l.name.value == title.value:
+           text = l.text.value
+           note_name = l
+           break
+
+    if not note_name:
+        text = NoteText(' '.join(args[1:])) #  обязательный параметр
+        note: Note  = Note(title, text, tag)
+        notes.append(note)
+        return f"{title.value}, {text.value}, {tag.value} has been added to the NoteBook"
+    else:
+        note_name.add_note_tag(tag)
+        text_tag =''
+        for i in note_name.tags:
+            text_tag += ' ' + i.value if text_tag != '' else i.value
+        return f"{note_name.name.value}, {note_name.text.value}, {text_tag} has been added to the NoteBook"
+
+@error_handler
+def handler_change_note(args):
+    title = None
+    if len(args) < 2:
+        raise TextNotGivenError
+    elif len(args) == 2:
+        old_ch_text = args[0]
+        new_ch_text = args[1]
+    elif len(args) == 3:
+        old_ch_text = args[0]
+        new_ch_text = args[1]
+        title = Name(args[2])
+
+    return notes.notes_change_text(old_ch_text, new_ch_text, title)
 
 @error_handler
 def sortnote(args):
@@ -300,17 +346,20 @@ handlers = {"hello": {"func": handler_greetings, "help_message": "Just greeting!
             "add record": {"func": handler_add, "help_message": "add record ContactName ContactPhone Contactbirthday"},
             "add birthday": {"func": handler_add_birthday, "help_message": "add birthday ContactName Contactbirthday"},
             "add phone": {"func": handler_add_phone, "help_message": "add phone ContactName ContactPhone"},
-            "change": {"func": handler_change, "help_message": "change ContactName OldPhone NewPhone"},
             "phone": {"func": handler_phone, "help_message": "phone ContactName"},
             "days to birthday": {"func": handler_days_to_birthday, "help_message": "days to birthday ContactName"},
             "show all": {"func": handler_show_all, "help_message": "showed all contacts"},
             "find note": {"func": find_note, "help_message": "find NoteText"},
             "find": {"func": find, "help_message": "find ContactName"},
-            "sort": {"func": sort, "help_message": "sort FolderPath"},
             "delnote": {"func": delete_note, "help_message": "delnote NoteName"},
             "help": {"func": reference, "help_message": "help NoteName"},
             "export": {"func": export, "help_message": "export NoteName"},
-            "add note": {"func": handler_addnote, "help_message": "add note name text"}}
+            "add note": {"func": handler_addnote, "help_message": "add note name text"},
+            "add tag": {"func": handler_add_note_tag, "help_message": "add tag NoteName Tag"},
+            "change note": {"func": handler_change_note, "help_message": "change note OldText NewText"},
+            "change": {"func": handler_change, "help_message": "change ContactName OldPhone NewPhone"},
+            "sortnote": {"func": sortnote, "help_message": "sortnote key order"},
+            "sort": {"func": sort, "help_message": "sort FolderPath"}}
 
 
 # key - command, value - handler.
