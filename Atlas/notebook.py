@@ -19,7 +19,7 @@ class InvalidNameError(Exception):
 
 class Name(Field):
     def is_valid(self, value):
-        if type(value) == str: 
+        if type(value) == str:
             return True
         else:
             raise InvalidNameError
@@ -55,14 +55,14 @@ class Note:
         #  Гиевский 02052023 - Закоментировал, так как дабовление в список происходит через .append
         # if tags:
         #     self.tags += tags
-    
+
     # Gievskiy 02052023
-    def add_note_tag(self, tag:Tag):
+    def add_note_tag(self, tag: Tag):
         self.tags.append(tag)
 
     def __str__(self) -> str:
         return f'Note : {self.name}, {self.text}, {self.tags}'
-    
+
     def __repr__(self) -> str:
         return f'Note : {self.name}, {self.text}, {self.tags}'
 
@@ -83,10 +83,10 @@ class Notebook(UserList):
 
     def __str__(self) -> str:
         return super().__str__()
-    
+
     def __repr__(self) -> str:
         return super().__repr__()
-        
+
     def notes_search_content(self, query):
         matching_notes = []
         if self.data:
@@ -94,10 +94,9 @@ class Notebook(UserList):
                 if re.search(query, note.text.value, re.IGNORECASE):
                     matching_notes.append(note)
         return matching_notes
-    
-    
+
     # Gievskiy 02052023
-    def notes_change_text(self, txt1:str, txt2:str, name_note:Name):
+    def notes_change_text(self, txt1: str, txt2: str, name_note: Name):
         if self.data:
             for note in self.data:
                 if name_note != None:
@@ -106,12 +105,13 @@ class Notebook(UserList):
                             # note.text.value = note.text.value.replace(txt1, txt2)
                             note.text.value = re.sub(txt1, txt2, note.text.value)
                         return f'in a note with a name {name_note.value} changed the text {txt1} to {txt2}, {note.text.value}'
-                
-                else:    
+
+                else:
                     if re.findall(txt1, note.text.value, re.IGNORECASE):
                         note.text.value = re.sub(txt1, txt2, note.text.value)
                         # note.text.value.replace(txt1, txt2)
                     return f'in a note changed the text {txt1} to {txt2}'
+
     # ****
 
     def save_notes_to_file(self):
@@ -126,7 +126,7 @@ class Notebook(UserList):
                     self.data = copy.deepcopy(notes.data)
         except:
             pass
-            
+
     def delete_note(self, note_name: str):
         if note_name:
             for note in self.data:
@@ -140,3 +140,12 @@ class Notebook(UserList):
         for note in self.data:
             names_list.append(note.name.value)
         return names_list
+
+    def get_list_of_text(self):
+        text_list = []
+        for note in self.data:
+            text_list.append(note.text.value)
+        return text_list
+
+    def show_all_notes(self):
+        return "\n\n".join([str(i) for i in self.data])
