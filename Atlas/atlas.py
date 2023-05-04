@@ -293,24 +293,103 @@ def reference(args):
         return file.read()
 
 
-handlers = {"hello": {"func": handler_greetings, "help_message": "Just greeting!"},
-            "good bye": {"func": handler_exit, "help_message": "exit from bot"},
-            "close": {"func": handler_exit, "help_message": "exit from bot"},
-            "exit": {"func": handler_exit, "help_message": "exit from bot"},
-            "add record": {"func": handler_add, "help_message": "add record ContactName ContactPhone Contactbirthday"},
-            "add birthday": {"func": handler_add_birthday, "help_message": "add birthday ContactName Contactbirthday"},
-            "add phone": {"func": handler_add_phone, "help_message": "add phone ContactName ContactPhone"},
-            "change": {"func": handler_change, "help_message": "change ContactName OldPhone NewPhone"},
-            "phone": {"func": handler_phone, "help_message": "phone ContactName"},
-            "days to birthday": {"func": handler_days_to_birthday, "help_message": "days to birthday ContactName"},
-            "show all": {"func": handler_show_all, "help_message": "showed all contacts"},
-            "find note": {"func": find_note, "help_message": "find NoteText"},
-            "find": {"func": find, "help_message": "find ContactName"},
-            "sort": {"func": sort, "help_message": "sort FolderPath"},
-            "delnote": {"func": delete_note, "help_message": "delnote NoteName"},
-            "help": {"func": reference, "help_message": "help NoteName"},
-            "export": {"func": export, "help_message": "export NoteName"},
-            "add note": {"func": handler_addnote, "help_message": "add note name text"}}
+# Gievskiy 02052023
+@error_handler
+def handler_add_note_tag(args):
+    note_name = None
+    if len(args) < 2:
+        raise TextNotGivenError
+
+    title = Name(args[0])
+    tag = Tag(args[1])
+
+    # У нас список, а не словарь
+    # note = notes.get(title.value)
+
+    for i, l in enumerate(notes):
+        if l.name.value == title.value:
+            text = l.text.value
+            note_name = l
+            break
+
+    if not note_name:
+        text = NoteText(' '.join(args[1:]))  # обязательный параметр
+        note: Note = Note(title, text, tag)
+        notes.append(note)
+        return f"{title.value}, {text.value}, {tag.value} has been added to the NoteBook"
+    else:
+        note_name.add_note_tag(tag)
+        text_tag = ''
+        for i in note_name.tags:
+            text_tag += ' ' + i.value if text_tag != '' else i.value
+        return f"{note_name.name.value}, {note_name.text.value}, {text_tag} has been added to the NoteBook"
+
+
+# **** 02052023
+
+@error_handler
+def show_all_notes(args):
+
+    notes_text = notes.show_all_notes()
+    if notes_text:
+        return notes_text
+    else:
+        return "Notebook is empty."
+
+handlers = {"hello": {"func": handler_greetings,
+                      "help_message": "Just greeting!"},
+            "goodbye": {"func": handler_exit,
+                        "help_message": "exit from bot"},
+            "close": {"func": handler_exit,
+                      "help_message": "exit from bot"},
+            "exit": {"func": handler_exit,
+                     "help_message": "exit from bot"},
+            "addrecord": {"func": handler_add,
+                          "help_message": "addrecord ContactName ContactPhone Contactbirthday"},
+            "addbirthday": {"func": handler_add_birthday,
+                            "help_message": "addbirthday ContactName Contactbirthday",
+                            "from_data": contacts.get_data_list},
+            "addphone": {"func": handler_add_phone,
+                         "help_message": "addphone ContactName ContactPhone",
+                         "from_data": contacts.get_data_list},
+            "change": {"func": handler_change,
+                       "help_message": "change ContactName OldPhone NewPhone",
+                       "from_data": contacts.get_data_list},
+            "phone": {"func": handler_phone,
+                      "help_message": "phone ContactName",
+                      "from_data": contacts.get_data_list},
+            "daystobirthday": {"func": handler_days_to_birthday,
+                               "help_message": "daystobirthday ContactName",
+                               "from_data": contacts.get_data_list},
+            "showall": {"func": handler_show_all,
+                        "help_message": "showed all contacts"},
+            "findnote": {"func": find_note,
+                         "help_message": "findnote NoteText",
+                         "from_data": notes.get_list_of_text},
+            "find": {"func": find,
+                     "help_message": "find ContactName",
+                     "from_data": contacts.get_data_list},
+            "sort": {"func": sort,
+                     "help_message": "sort FolderPath"},
+            "delnote": {"func": delete_note,
+                        "help_message": "delnote NoteName",
+                        "from_data": notes.get_data_list},
+            "sortnote": {"func": sortnote,
+                        "help_message": "sortnote",
+                        "nested_dict": {"name": {"inc": None, "dec": None}, "text": {"inc": None, "dec": None}}},
+            # Gievskiy 02052023
+            "addnote": {"func": handler_add_note,
+                        "help_message": "addnote NoteName"},
+            "addtag": {"func": handler_add_note_tag,
+                       "help_message": "addtag note NoteName"},
+            # **** 02052023
+            "help": {"func": reference, "help_message":
+                    "help NoteName"},
+            "export": {"func": export,
+                      "help_message": "export NoteName"},
+            "showallnotes": {"func": show_all_notes,
+                             "help_message": "show all notes"}
+            }
 
 
 # key - command, value - handler.
@@ -320,15 +399,20 @@ def parce(command):
     # returns list. first element - handler and the rest are arguments
     # returns None if command is not recognized
     command = command.strip().lower()
-    parced_command = []
-    for handler in handlers:
-        if command.startswith(handler):
-            command = command.removeprefix(handler)
-            parced_command.append(handlers[handler]["func"])
-            break
-    if parced_command:
-        parced_command += command.split()
-        return parced_command
+
+    if command:
+        incoming_command = command.split()[0]
+
+        parced_command = []
+        for handler in handlers:
+            if incoming_command == handler:
+                command = command.removeprefix(handler)
+                parced_command.append(handlers[handler]["func"])
+                break
+        if parced_command:
+            parced_command += command.split()
+            return parced_command
+
     return None
 
 
@@ -355,6 +439,7 @@ def create_completer_data():
 
 
 def update_nested_dict():
+
     global comands_nested_dict
 
     for command_name, params_dict in handlers.items():
@@ -364,13 +449,16 @@ def update_nested_dict():
 
             meta_dict = {}
 
-            for note_name in from_data.get_data_list():
+            list_of_data = from_data()
+
+            for note_name in list_of_data:
                 meta_dict.update({note_name: comands_list_meta_dict.get(command_name)})
 
-            comands_nested_dict[command_name] = WordCompleter(from_data.get_data_list(), match_middle=True,
+            comands_nested_dict[command_name] = WordCompleter(list_of_data, match_middle=True,
                                                               sentence=True, meta_dict=meta_dict)
         nested_dict = params_dict.get("nested_dict")
         if nested_dict:
+
             comands_nested_dict[command_name] = nested_dict
 
 
