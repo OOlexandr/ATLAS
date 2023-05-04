@@ -1,13 +1,18 @@
-from .address_book import *
-from .notebook import *
-from .move_main import main_sort, InvalidPath
+import os
+import Atlas.address_book as ab
+from Atlas.notebook import *
+from Atlas.move_main import main_sort, InvalidPath
+
 import csv
 from prompt_toolkit import PromptSession
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 from prompt_toolkit.completion import WordCompleter
 from prompt_toolkit.completion import NestedCompleter
 
-from .config import use_promt_toolkit, pre_command_text, use_nested_completer
+from Atlas.config import use_promt_toolkit, pre_command_text, use_nested_completer
+
+
+dir_path = os.path.dirname(__file__)
 
 
 class NameNotGivenError(Exception):
@@ -38,7 +43,7 @@ class ContctNameNotGivenError(Exception):
     pass
 
 
-contacts = AddressBook()
+contacts = ab.AddressBook()
 notes = Notebook()
 
 
@@ -48,11 +53,11 @@ def error_handler(func):
             return func(args)
         except KeyError:
             return "The user is not in the address book"
-        except InvalidPhoneError:
+        except ab.InvalidPhoneError:
             return "Number is invalid"
-        except InvalidNameError:
+        except ab.InvalidNameError:
             return "Name is invalid"  # I don't expect ever getting it.
-        except InvalidDateError:
+        except ab.InvalidDateError:
             return "Birthday is invalid"
         except NameNotGivenError:
             return "Please enter user name"
@@ -60,11 +65,11 @@ def error_handler(func):
             return "Please enter user name and number"
         except BirthdayNotGivenError:
             return "Please enter user name and birthday"
-        except RecordAlreadyExists:
+        except ab.RecordAlreadyExists:
             return "The user is already in the address book"
-        except PhoneAlreadyExistsError:
+        except ab.PhoneAlreadyExistsError:
             return "The phone already exists"
-        except PhoneNotFoundError:
+        except ab.PhoneNotFoundError:
             return "The phone is not found"
         except PathNotGivenError:
             return "Please enter path to the folder"
@@ -110,9 +115,9 @@ def handler_exit(args):
 def handler_add(args):
     if len(args) < 1:
         raise NameNotGivenError
-    name = Name(args[0])
-    phone = Phone(args[1]) if args[1:] else None
-    birthday = Birthday(args[2]) if args[2:] else None
+    name = ab.Name(args[0])
+    phone = ab.Phone(args[1]) if args[1:] else None
+    birthday = ab.Birthday(args[2]) if args[2:] else None
     contacts.add_record(name, phone, birthday)
     return "Contact was added succesfully"
 
@@ -121,8 +126,8 @@ def handler_add(args):
 def handler_change(args):
     if len(args) < 3:
         raise PhoneNotGivenError
-    old_phone = Phone(args[1])
-    new_phone = Phone(args[2])
+    old_phone = ab.Phone(args[1])
+    new_phone = ab.Phone(args[2])
     contacts[args[0]].change_phone(old_phone, new_phone)
     return "Contact was changed succesfully"
 
@@ -131,7 +136,7 @@ def handler_change(args):
 def handler_add_birthday(args):
     if len(args) < 2:
         raise BirthdayNotGivenError
-    birthday = Birthday(args[1])
+    birthday = ab.Birthday(args[1])
     contacts[args[0]].birthday = birthday
     return "Birthday was added succesfully"
 
@@ -140,7 +145,7 @@ def handler_add_birthday(args):
 def handler_add_phone(args):
     if len(args) < 2:
         raise PhoneNotGivenError
-    phone = Phone(args[1])
+    phone = ab.Phone(args[1])
     contacts[args[0]].add_phone(phone)
     return "Phone was added succesfully"
 
@@ -284,7 +289,7 @@ def sortnote(args):
 
 @error_handler
 def reference(args):
-    with open('readme.txt', encoding="utf-8") as file:
+    with open(os.path.join(dir_path, 'readme.txt'), encoding="utf-8") as file:
         return file.read()
 
 
